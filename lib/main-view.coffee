@@ -3,9 +3,7 @@
 module.exports =
 class NodeDebuggerView extends View
   @content: ->
-    @div class: "node-debugger panel", =>
-      @div class: "panel-heading", "Node Debugger"
-      @div class: "panel-body padded", "body is here"
+    @div class: "main-view", =>
 
   initialize: (serializeState) ->
     atom.workspaceView.command "node-debugger:toggle", => @toggle()
