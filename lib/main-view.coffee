@@ -18,6 +18,7 @@ class MainView extends View
     @runner.on 'change', => @showLoading()
     @runner.on 'error', => @showConfig()
     @connection.on 'change', => @onConnectionChange()
+    @connection.on 'error', => @onConnectionChange()
 
   # Returns an object that can be retrieved when package is activated
   serialize: ->
@@ -34,12 +35,18 @@ class MainView extends View
 
   onConnectionChange: ->
     @empty()
-    @append(new FunctionalView)
+    console.log @connection
+    if @connection._connected
+      @append(new FunctionalView)
+    else
+      @append(new ConfigView)
 
   showLoading: ->
     @empty()
+    console.log @runner
     @append(new LoadingView)
 
   showConfig: ->
     @empty()
+    console.log @runner
     @append(new ConfigView)

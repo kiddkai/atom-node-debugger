@@ -40,3 +40,15 @@ describe 'MainView', ->
     connectionStub.emit 'change'
     expect(mainView.find('.config-view')).not.toExist()
     expect(mainView.find('.functional-view')).toExist()
+
+
+  it 'should shows the config view when the connection change to non connected', ->
+    connectionStub._connected = false
+    connectionStub.emit 'change'
+    expect(mainView.find('.config-view')).toExist()
+
+
+  it 'should shows the config view when connection error', ->
+    connectionStub._connected = false
+    connectionStub.emit 'error'
+    expect(mainView.find('.config-view')).toExist()
