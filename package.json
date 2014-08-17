@@ -14,6 +14,7 @@
   "dependencies": {
     "node-debugger": "git+https://github.com/kiddkai/node-debugger.git#master",
     "split": "^0.3.0",
+    "through2": "^0.6.1",
     "which": "^1.0.5"
   },
   "devDependencies": {
