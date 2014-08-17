@@ -9,7 +9,7 @@ class LogView extends View
 
   @content: =>
     @div class: 'log-view stdout', =>
-      @div class: 'btn-group', =>
+      @div class: 'btn-group controls', =>
         @button class: 'btn selected', 'data-logtype': 'stdout','stdout'
         @button class: 'btn', 'data-logtype': 'stderr','stderr'
 

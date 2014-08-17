@@ -1,4 +1,5 @@
 {View, $} = require 'atom'
+LogView = require './log-view'
 
 module.exports =
 class FunctionalView extends View
@@ -12,6 +13,9 @@ class FunctionalView extends View
 
         @div class: 'btn-group pull-right', =>
           @button class: 'btn btn-error', 'x'
+
+      @div class: 'functional console inset-panel', =>
+        @subview 'logView', new LogView
 
   initialize: ->
     self = this
