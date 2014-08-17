@@ -1,0 +1,42 @@
+MainView = require '../lib/main-view'
+Debugger = require '../lib/debugger'
+{EventEmitter} = require 'events'
+
+describe 'MainView', ->
+  mainView = null
+  runnerStub = null
+  connectionStub = null
+
+  beforeEach ->
+    runner = Debugger.runner
+    connection = Debugger.connection
+
+    runnerStub = new EventEmitter
+    connectionStub = new EventEmitter
+
+    Debugger.runner = runnerStub
+    Debugger.connection = connectionStub
+
+    mainView = new MainView
+
+    Debugger.runner = runner
+    Debugger.connection = connection
+
+  it 'should be able to show loading view when runner started', ->
+    expect(mainView.find('.config-view')).toExist()
+    runnerStub.emit('change');
+    expect(mainView.find('.config-view')).not.toExist()
+    expect(mainView.find('.loading-view')).toExist()
+
+  it 'should show the config view again when runner got error', ->
+    expect(mainView.find('.config-view')).toExist()
+    runnerStub.emit('change');
+    expect(mainView.find('.config-view')).not.toExist()
+    runnerStub.emit('error');
+    expect(mainView.find('.config-view')).toExist()
+
+  it 'should able to show the functional page when connection started', ->
+    connectionStub._connected = true
+    connectionStub.emit 'change'
+    expect(mainView.find('.config-view')).not.toExist()
+    expect(mainView.find('.functional-view')).toExist()
