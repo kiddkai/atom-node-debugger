@@ -1,11 +1,13 @@
 {View} = require 'atom'
+MainView = require './main-view'
 
 module.exports =
 class NodeDebuggerView extends View
   @content: ->
     @div class: "node-debugger panel", =>
       @div class: "panel-heading", "Node Debugger"
-      @div class: "panel-body padded", "body is here"
+      @div class: "panel-body padded" , =>
+        @subview 'mainView', new MainView
 
   initialize: (serializeState) ->
     atom.workspaceView.command "node-debugger:toggle", => @toggle()

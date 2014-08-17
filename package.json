@@ -3,13 +3,16 @@
   "main": "./lib/node-debugger",
   "version": "0.0.1",
   "description": "Debugger For Nodejs",
-  "activationEvents": ["node-debugger:toggle"],
+  "activationEvents": [
+    "node-debugger:toggle"
+  ],
   "repository": "https://github.com/atom/node-debugger",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
   },
   "dependencies": {
-    "node-debugger": "git+https://github.com/kiddkai/node-debugger.git#master"
+    "node-debugger": "git+https://github.com/kiddkai/node-debugger.git#master",
+    "which": "^1.0.5"
   }
 }
