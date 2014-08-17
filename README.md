@@ -1,7 +1,6 @@
-node-debugger package
-=======================
+node-debugger package [![Build Status](https://travis-ci.org/kiddkai/atom-node-debugger.svg)](https://travis-ci.org/kiddkai/atom-node-debugger) [![Build status](https://ci.appveyor.com/api/projects/status/5b3pwtpbt3k9pdwg)](https://ci.appveyor.com/project/kiddkai/atom-node-debugger)
+==============================
 
-[![Build Status](https://travis-ci.org/kiddkai/atom-node-debugger.svg)](https://travis-ci.org/kiddkai/atom-node-debugger)
 
 
 Done
