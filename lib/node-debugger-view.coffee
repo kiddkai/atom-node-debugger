@@ -17,6 +17,7 @@ class NodeDebuggerView extends View
 
   # Tear down any state and detach
   destroy: ->
+    @mainView.destroy()
     @detach()
 
   toggle: ->

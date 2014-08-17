@@ -27,12 +27,6 @@ class MainView extends View
   destroy: ->
     @detach()
 
-  toggle: ->
-    if @hasParent()
-      @detach()
-    else
-      atom.workspaceView.appendToBottom(this)
-
   onConnectionChange: ->
     @empty()
     console.log @connection
@@ -43,7 +37,6 @@ class MainView extends View
 
   showLoading: ->
     @empty()
-    console.log @runner
     @append(new LoadingView)
 
   showConfig: ->
