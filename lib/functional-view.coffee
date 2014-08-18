@@ -6,7 +6,7 @@ class FunctionalView extends View
   @content: ->
     @div class: "functional-view console", =>
       @div class: 'block', =>
-        @div class: 'btn-group', =>
+        @div class: 'btn-group functional-controls', =>
           @button class: 'btn selected', 'data-functional': 'console', 'Console'
           @button class: 'btn', 'data-functional': 'debug','Debug'
           @button class: 'btn', 'data-functional': 'frames','Frame'
@@ -22,7 +22,7 @@ class FunctionalView extends View
     @on 'click', '[data-functional]', (e) => @toggleFunctional(e)
 
   toggleFunctional: (e) ->
-    $prevSelected = @find('.selected')
+    $prevSelected = @find('.functional-controls .selected')
     @removeClass($prevSelected.data('functional'))
     $prevSelected.removeClass('selected')
 
