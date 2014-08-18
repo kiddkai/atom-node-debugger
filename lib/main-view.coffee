@@ -29,7 +29,6 @@ class MainView extends View
 
   onConnectionChange: ->
     @empty()
-    console.log @connection
     if @connection._connected
       @append(new FunctionalView)
     else
@@ -41,5 +40,4 @@ class MainView extends View
 
   showConfig: ->
     @empty()
-    console.log @runner
     @append(new ConfigView)
