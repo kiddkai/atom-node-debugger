@@ -45,7 +45,6 @@ class LogView extends View
       onLine = (chunk, enc, callback) ->
         key = outType + 'View'
         chunk = chunk.toString('utf-8')
-        console.log(chunk)
         $para = $('<p>')
         $para.text(chunk)
         $para.appendTo(self[key])
