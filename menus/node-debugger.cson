@@ -9,7 +9,8 @@
     'submenu': [
       'label': 'node-debugger'
       'submenu': [
-        { 'label': 'Toggle', 'command': 'node-debugger:toggle' }
+        { 'label': 'Toggle Breakpoint', 'command': 'node-debugger:breakpoint-toggle'}
+        { 'label': 'Toggle', 'command': 'node-debugger:toggle' },
       ]
     ]
   }

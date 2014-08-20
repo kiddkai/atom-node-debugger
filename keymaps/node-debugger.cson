@@ -8,4 +8,5 @@
 # For more detailed documentation see
 # https://atom.io/docs/latest/advanced/keymaps
 '.workspace':
-  'ctrl-alt-o': 'node-debugger:toggle'
+  'ctrl-alt-n': 'node-debugger:toggle'
+  'ctrl-alt-t': 'node-debugger:breakpoint-toggle'

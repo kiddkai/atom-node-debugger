@@ -11,7 +11,7 @@ class NodeDebuggerView extends View
 
   initialize: (serializeState) ->
     atom.workspaceView.command "node-debugger:toggle", => @toggle()
-
+    atom.workspaceView.command "node-debugger:breakpoint-toggle", => @toggleBreakpoint()
   # Returns an object that can be retrieved when package is activated
   serialize: ->
 
@@ -25,3 +25,5 @@ class NodeDebuggerView extends View
       @detach()
     else
       atom.workspaceView.appendToBottom(this)
+
+  toggleBreakpoint: ->
