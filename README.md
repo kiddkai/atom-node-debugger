@@ -10,6 +10,8 @@ Done
 2. Run a node process (.js) files
 3. Connect to debugger
 4. Show [stderr/stdout] log
+5. List breakpoints
+6. Jump to source when break
 
 Still working in progress
 

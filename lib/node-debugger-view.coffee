@@ -1,5 +1,7 @@
 {View} = require 'atom'
 MainView = require './main-view'
+debuggerContext = require './debugger'
+editorUtil = require './editor-util'
 
 module.exports =
 class NodeDebuggerView extends View
@@ -11,7 +13,16 @@ class NodeDebuggerView extends View
 
   initialize: (serializeState) ->
     atom.workspaceView.command "node-debugger:toggle", => @toggle()
-    atom.workspaceView.command "node-debugger:breakpoint-toggle", => @toggleBreakpoint()
+    atom.workspaceView.command "node-debugger:breakpoint-toggle", =>
+      @toggleBreakpoint()
+
+    @scripts = debuggerContext.scripts
+    @scripts.on 'break', (script, line) =>
+      editorUtil.jumpToFile(script, line)
+
+
+
+
   # Returns an object that can be retrieved when package is activated
   serialize: ->
 
