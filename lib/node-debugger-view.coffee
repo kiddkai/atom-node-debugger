@@ -20,9 +20,6 @@ class NodeDebuggerView extends View
     @scripts.on 'break', (script, line) =>
       editorUtil.jumpToFile(script, line)
 
-
-
-
   # Returns an object that can be retrieved when package is activated
   serialize: ->
 
@@ -38,3 +35,4 @@ class NodeDebuggerView extends View
       atom.workspaceView.appendToBottom(this)
 
   toggleBreakpoint: ->
+    
