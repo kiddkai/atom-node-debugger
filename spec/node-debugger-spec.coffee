@@ -16,8 +16,6 @@ describe "NodeDebugger", ->
     it "attaches and then detaches the view", ->
       expect(atom.workspaceView.find('.node-debugger')).not.toExist()
 
-      # This is an activation event, triggering it will cause the package to be
-      # activated.
       atom.workspaceView.trigger 'node-debugger:toggle'
 
       waitsForPromise ->
