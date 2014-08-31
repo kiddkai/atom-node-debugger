@@ -25,7 +25,7 @@ class LogView extends View
     if (@runner.proc)
       @listenOutput(@runner.proc)
 
-    @runner.on 'change', => @listenOutput(runner.proc)
+    @runner.on 'change', => @listenOutput(@runner.proc)
 
   switchLogType: (e) ->
     $selected = @find('.selected')
