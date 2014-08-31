@@ -10,7 +10,6 @@ class BreakpointView extends View
 
   initialize: ->
     @breakpoints = debuggerContext.breakpoints
-
     @breakpoints.on 'change', => @showBreakpoints()
 
   showBreakpoints: ->

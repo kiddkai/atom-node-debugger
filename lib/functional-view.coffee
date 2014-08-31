@@ -15,9 +15,10 @@ class FunctionalView extends View
           @button class: 'btn', 'data-functional': 'frame','Frame'
 
         @div class: 'btn-group', =>
+          @button class: 'btn', 'data-continue': '', 'continue'
           @button class: 'btn', 'data-continue': 'in', 'step in'
+          @button class: 'btn', 'data-continue': 'next', 'step next'
           @button class: 'btn', 'data-continue': 'out', 'step out'
-          @button class: 'btn',  'data-continue': 'next', 'step next'
 
         @div class: 'btn-group pull-right', =>
           @button class: 'btn btn-error', 'x'
