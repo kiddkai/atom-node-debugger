@@ -23,7 +23,6 @@ class FunctionalView extends View
           @button class: 'btn btn-error', 'x'
 
 
-
       @div class: 'functional console inset-panel', =>
         @subview 'logView', new LogView
 
@@ -46,6 +45,6 @@ class FunctionalView extends View
 
 
   continue: (e) ->
-    $el = e.target
+    $el = $(e.target)
     action = $el.data('continue')
     debuggerContext.continue(action)

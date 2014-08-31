@@ -9,6 +9,7 @@ exports.jumpToFile = (script, line) ->
   onDone = (editor) ->
     if editor.getText().length is 0
       editor.setText(script.source)
+      editor.setCursorBufferPosition([line, 0], autoscroll: true)
 
     return editor
 
