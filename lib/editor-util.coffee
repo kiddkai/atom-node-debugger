@@ -8,9 +8,16 @@ exports.jumpToFile = (script, line) ->
 
   onDone = (editor) ->
     if editor.getText().length is 0
-      editor.setText(script.source)
-      editor.setCursorBufferPosition([line, 0], autoscroll: true)
+      if not script.source?
+        debuggerContext.scripts.getById(script.id)
+          .then (script) ->
+            editor.setText(script.source)
+            editor.setCursorBufferPosition([line, 0], autoscroll: true)
+          .done()
+      else
+        editor.setText(script.source)
 
+    editor.setCursorBufferPosition([line, 0], autoscroll: true)
     return editor
 
   onError = (e)->
