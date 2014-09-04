@@ -33,7 +33,3 @@ class BreakpointItemView extends View
       @scripts
         .getByName(breakpoint.scriptName)
         .then handleScriptLoad
-
-    else
-      @find('.path').text(script.name)
-      @removeClass('loading')
