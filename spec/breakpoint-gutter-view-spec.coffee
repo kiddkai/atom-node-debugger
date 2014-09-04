@@ -22,8 +22,8 @@ describe 'Set a gutter according to the breakpoints', ->
 
   it 'should be able to add the class to gutter', ->
     spyOn(debuggerContext.breakpoints, 'getBreakpoints').andReturn([
-      { script_name: '/path/to/file1.js', line: 1 },
-      { script_name: '/path/to/file2.js', line: 10 }
+      { scriptName: '/path/to/file1.js', line: 1 },
+      { scriptName: '/path/to/file2.js', line: 10 }
     ])
     spyOn(editor, 'getPath').andReturn('/path/to/file2.js')
     breakpointGutterView = new BreakpointGutterView(editorView)
@@ -32,8 +32,8 @@ describe 'Set a gutter according to the breakpoints', ->
 
   it 'should be able to add the breakpoint for the file which path is the same', ->
     spyOn(debuggerContext.breakpoints, 'getBreakpoints').andReturn([
-      { script_name: '/path/to/file1.js', line: 1 },
-      { script_name: '/path/to/file2.js', line: 10 }
+      { scriptName: '/path/to/file1.js', line: 1 },
+      { scriptName: '/path/to/file2.js', line: 10 }
     ])
     spyOn(editor, 'getPath').andReturn('/path/to/file2.js')
     breakpointGutterView = new BreakpointGutterView(editorView)
@@ -41,8 +41,8 @@ describe 'Set a gutter according to the breakpoints', ->
 
   it 'should be able to add the classes to line when editor changed path', ->
     spyOn(debuggerContext.breakpoints, 'getBreakpoints').andReturn([
-      { script_name: '/path/to/file1.js', line: 1 },
-      { script_name: '/path/to/file2.js', line: 10 }
+      { scriptName: '/path/to/file1.js', line: 1 },
+      { scriptName: '/path/to/file2.js', line: 10 }
     ])
     spyOn(editor, 'getPath').andReturn('/path/to/file1.js')
     breakpointGutterView = new BreakpointGutterView(editorView)
@@ -52,7 +52,7 @@ describe 'Set a gutter according to the breakpoints', ->
   it 'should be able to update the classes to line when breakpoints changed', ->
     breakpointGutterView = new BreakpointGutterView(editorView)
     spyOn(breakpoints, 'getBreakpoints').andReturn([{
-        script_name: '/path/to/file2.js',
+        scriptName: '/path/to/file2.js',
         line: 12
     }])
     spyOn(editor, 'getPath').andReturn('/path/to/file2.js')

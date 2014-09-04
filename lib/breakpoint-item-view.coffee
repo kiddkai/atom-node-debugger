@@ -15,14 +15,14 @@ class BreakpointItemView extends View
 
 
   initialize: (breakpoint) ->
+    that = this
     @breakpoint = breakpoint
     @scripts = debuggerContext.scripts
-
     @addClass('loading')
 
-    handleScriptLoad = (script) =>
-      @find('.path').text(script.name)
-      @removeClass('loading')
+    handleScriptLoad = (script) ->
+      that.find('.path').text(script.name)
+      that.removeClass('loading')
 
     if breakpoint.type is 'scriptId'
       @scripts
@@ -30,6 +30,6 @@ class BreakpointItemView extends View
         .then handleScriptLoad
 
     else if breakpoint.type is 'scriptName'
-      @scripts
-        .getByName(breakpoint.scriptName)
-        .then handleScriptLoad
+      handleScriptLoad({
+        name: breakpoint.scriptName
+      })

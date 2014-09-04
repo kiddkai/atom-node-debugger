@@ -6,19 +6,37 @@ class BreakpointGutterView
   Subscriber.includeInto(this)
 
   constructor: (@editorView) ->
+    debugger
     {@editor, @gutter} = @editorView
     {@breakpoints} = debuggerContext
 
-    @subscribe @editorView, 'editor:path-changed', => @updateBreakpoint()
-    @subscribe @editorView, 'editor:will-be-removed', => @unscribe()
-    @subscribe @breakpoints, 'change', => @updateBreakpoint()
+    @subscribe @editorView, 'editor:path-changed', @subsribeBufferChange
 
+    @subscribe @editorView, 'editor:will-be-removed', => @unscribe()
+    @subscribe @breakpoints, 'change', @updateBreakpoint
+
+    @subsribeBufferChange()
+
+
+  subsribeBufferChange: =>
+    @unsubscribeFromBuffer()
+
+    if @buffer = @editor.getBuffer()
+      console.log '12223333333444444'
+      @scheduleUpdate()
+      @buffer.on 'contents-modified', @updateBreakpoint
+
+  unsubscribeFromBuffer: =>
+    if @buffer?
+      @buffer.off 'contents-modified', @updateBreakpoint
+      @buffer = null
+
+  scheduleUpdate: ->
     @updateBreakpoint()
 
-
-  updateBreakpoint: ->
+  updateBreakpoint: =>
     path = @editor.getPath()
 
     for breakpoint in @breakpoints.getBreakpoints()
-      if breakpoint.script_name is @editor.getPath()
+      if breakpoint.scriptName is @editor.getPath()
         @gutter.addClassToLine(breakpoint.line, 'gutter-breakpoint')
