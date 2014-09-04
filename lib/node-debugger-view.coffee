@@ -3,6 +3,7 @@ MainView = require './main-view'
 debuggerContext = require './debugger'
 editorUtil = require './editor-util'
 
+
 module.exports =
 class NodeDebuggerView extends View
   @content: ->
@@ -13,8 +14,8 @@ class NodeDebuggerView extends View
 
   initialize: (serializeState) ->
     atom.workspaceView.command "node-debugger:toggle", => @toggle()
-    atom.workspaceView.command "node-debugger:breakpoint-toggle", =>
-      @toggleBreakpoint()
+    atom.workspaceView.command "node-debugger:breakpoint-add", =>
+      @addBreakpoint()
 
     @scripts = debuggerContext.scripts
     @scripts.on 'break', (script, line) =>
@@ -32,4 +33,18 @@ class NodeDebuggerView extends View
     else
       atom.workspaceView.appendToBottom(this)
 
-  toggleBreakpoint: ->
+  addBreakpoint: ->
+    activeEditor = atom.workspace.getActiveEditor()
+    row = activeEditor.getCursorBufferPosition().row
+    path = activeEditor.getPath()
+
+    debuggerContext
+      .breakpoints
+      .create
+        type: 'script'
+        target: path
+        line: row
+        column: 1
+        enabled: true
+      .then (breakpoint) ->
+        # do nothing

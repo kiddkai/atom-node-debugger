@@ -24,16 +24,14 @@ class BreakpointItemView extends View
       @find('.path').text(script.name)
       @removeClass('loading')
 
-    return if not script?
-
     if breakpoint.type is 'scriptId'
       @scripts
-        .getById(breakpoint.script_id)
+        .getById(breakpoint.scriptId)
         .then handleScriptLoad
 
     else if breakpoint.type is 'scriptName'
       @scripts
-        .getByName(breakpoint.script_name)
+        .getByName(breakpoint.scriptName)
         .then handleScriptLoad
 
     else
