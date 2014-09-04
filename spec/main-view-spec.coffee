@@ -23,16 +23,24 @@ describe 'MainView', ->
     Debugger.connection = connection
 
   it 'should be able to show loading view when runner started', ->
+    runnerStub.proc = {}
     expect(mainView.find('.config-view')).toExist()
     runnerStub.emit('change');
     expect(mainView.find('.config-view')).not.toExist()
     expect(mainView.find('.loading-view')).toExist()
 
   it 'should show the config view again when runner got error', ->
+    runnerStub.proc = {}
     expect(mainView.find('.config-view')).toExist()
     runnerStub.emit('change');
     expect(mainView.find('.config-view')).not.toExist()
     runnerStub.emit('error');
+    expect(mainView.find('.config-view')).toExist()
+
+  it 'should show the config view when runner changed and without proc', ->
+    runnerStub.proc = null
+    expect(mainView.find('.config-view')).toExist()
+    runnerStub.emit('change');
     expect(mainView.find('.config-view')).toExist()
 
   it 'should able to show the functional page when connection started', ->

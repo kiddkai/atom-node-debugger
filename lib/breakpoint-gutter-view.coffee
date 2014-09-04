@@ -6,13 +6,12 @@ class BreakpointGutterView
   Subscriber.includeInto(this)
 
   constructor: (@editorView) ->
-    debugger
     {@editor, @gutter} = @editorView
     {@breakpoints} = debuggerContext
 
     @subscribe @editorView, 'editor:path-changed', @subsribeBufferChange
 
-    @subscribe @editorView, 'editor:will-be-removed', => @unscribe()
+    @subscribe @editorView, 'editor:will-be-removed', => @unsubscribe()
     @subscribe @breakpoints, 'change', @updateBreakpoint
 
     @subsribeBufferChange()
@@ -22,7 +21,6 @@ class BreakpointGutterView
     @unsubscribeFromBuffer()
 
     if @buffer = @editor.getBuffer()
-      console.log '12223333333444444'
       @scheduleUpdate()
       @buffer.on 'contents-modified', @updateBreakpoint
 

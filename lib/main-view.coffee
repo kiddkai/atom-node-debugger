@@ -35,6 +35,7 @@ class MainView extends View
       @append(new ConfigView)
 
   showLoading: ->
+    return if not @runner.proc?      
     @empty()
     @append(new LoadingView)
 
