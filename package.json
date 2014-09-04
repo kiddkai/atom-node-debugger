@@ -6,7 +6,7 @@
   "activationEvents": [
     "node-debugger:toggle"
   ],
-  "repository": "https://github.com/atom/node-debugger",
+  "repository": "https://github.com/kiddkai/atom-node-debugger",
   "license": "MIT",
   "engines": {
     "atom": ">0.50.0"
