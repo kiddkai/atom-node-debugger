@@ -9,9 +9,9 @@ class BreakpointGutterView
     {@editor, @gutter} = @editorView
     {@breakpoints} = debuggerContext
 
-    @subscribe @editorView, 'editor:path-changed', => @updateBreakpoint
+    @subscribe @editorView, 'editor:path-changed', => @updateBreakpoint()
     @subscribe @editorView, 'editor:will-be-removed', => @unscribe()
-    @subscribe @breakpoints, 'change', => @updateBreakpoint
+    @subscribe @breakpoints, 'change', => @updateBreakpoint()
 
     @updateBreakpoint()
 

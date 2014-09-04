@@ -49,12 +49,15 @@ describe 'Set a gutter according to the breakpoints', ->
     editorView.trigger 'editor:path-changed'
     expect(gutter.addClassToLine).toHaveBeenCalledWith(1, 'gutter-breakpoint')
 
-  # it 'should be able to update the classes to line when breakpoints changed', ->
-  #   breakpointGutterView = new BreakpointGutterView(editorView)
-  #   spyOn(breakpoints, 'getBreakpoints').andReturn([{
-  #       script_name: 'path/to/file2.js',
-  #       line: 12
-  #   }])
-  #
-  #   breakpoints.emit 'change'
-  #   expect(gutter.addClassToLine).toHaveBeenCalledWith(12, 'gutter-breakpoint');
+  it 'should be able to update the classes to line when breakpoints changed', ->
+    breakpointGutterView = new BreakpointGutterView(editorView)
+    spyOn(breakpoints, 'getBreakpoints').andReturn([{
+        script_name: '/path/to/file2.js',
+        line: 12
+    }])
+    spyOn(editor, 'getPath').andReturn('/path/to/file2.js')
+    console.log 'emit'
+    breakpoints.emit 'change'
+
+    console.log 'done emit'
+    expect(gutter.addClassToLine).toHaveBeenCalledWith(12, 'gutter-breakpoint');
