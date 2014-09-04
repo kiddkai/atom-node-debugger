@@ -56,8 +56,5 @@ describe 'Set a gutter according to the breakpoints', ->
         line: 12
     }])
     spyOn(editor, 'getPath').andReturn('/path/to/file2.js')
-    console.log 'emit'
     breakpoints.emit 'change'
-
-    console.log 'done emit'
     expect(gutter.addClassToLine).toHaveBeenCalledWith(12, 'gutter-breakpoint');
