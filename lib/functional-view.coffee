@@ -2,7 +2,7 @@
 LogView = require './log-view'
 BreakpointView = require './breakpoint-view'
 debuggerContext = require './debugger'
-
+FrameView = require './frame-view'
 
 module.exports =
 class FunctionalView extends View
@@ -23,12 +23,16 @@ class FunctionalView extends View
         @div class: 'btn-group pull-right', =>
           @button class: 'btn btn-error', 'x'
 
-
+      # panel area
       @div class: 'functional console inset-panel', =>
         @subview 'logView', new LogView
 
       @div class: 'functional breakpoint', =>
         @subview 'breakpointsView', new BreakpointView
+
+      @div class: 'functional frame', =>
+        @subview 'frameView', new FrameView
+
 
   initialize: ->
     self = this
