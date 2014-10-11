@@ -8,7 +8,10 @@ class Variable
 
   # input with v8 variable object
   constructor: (obj) ->
-    if obj.value.ref?
+    @_isPopulated = true
+
+    if obj.value.ref instanceof Number
+      console.log('not populated')
       @ref = obj.value.ref
       @_isPopulated = false
 

@@ -1,14 +1,14 @@
-{View, $} = require 'atom'
+{View, $, $$} = require 'atom'
 debuggerContext = require './debugger'
-
+VariableView = require './variable-view'
 
 module.exports =
 class FrameView extends View
 
   @content: =>
-    @div class:'frames-view', =>
-      @ul class: 'frames-arguments', outlet: 'argumentList'
-      @ul class: 'frames-variables', outlet: 'variableList'
+    @ul class:'frames-view list-tree has-collapsable-children', =>
+      @li class: 'frames-arguments list-nested-item', outlet: 'argumentList'
+      @li class: 'frames-variables list-nested-item', outlet: 'variableList'
 
   initialize: ->
     @frames = debuggerContext.frames
@@ -23,5 +23,12 @@ class FrameView extends View
     item = @frames.get()
     @argumentList.empty()
 
-    item.arguments.forEach (variable) =>
-      self.argumentList.append($('<li>').text(variable.name))
+    @argumentList.append $$ ->
+      @div class: 'list-item', =>
+        @text 'Arguments'
+
+    if item? and item.arguments?
+      @argumentList.append $$ ->
+        @ul class: 'list-tree', =>
+          for variable in item.arguments
+            @subview 'variable', new VariableView(variable)

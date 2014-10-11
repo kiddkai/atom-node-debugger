@@ -1,17 +1,62 @@
-{View, $} = require 'atom'
+{View, $, $$} = require 'atom'
 debuggerContext = require './debugger'
-
+Variable = require './variable'
 
 module.exports =
-class FrameView extends View
+class VariableView extends View
 
-  @content (variable): =>
-    @li class:'variable-view', =>
-      @span outlet: 'variable-name', variable.name
-      if variable.value.ref?
-        @div outlet: 'variable-value', 'not populated'
-      else
-        @div outlet: 'variable-value', variable.value.value
-        @div outlet: 'variable-type', "[#{variable.value.type}]"
+  @content: =>
+    @li class:'variable-view list-nexted-item', =>
+      @div class: 'list-item', =>
+        @span outlet: 'name'
+        @span class: 'variable-value', outlet: 'value'
 
-  initialize: ->
+  initialize: (variable) ->
+    @variable = new Variable(variable)
+    @name.text("#{@variable.name}: ");
+    @render()
+
+
+  render: =>
+    variable = @variable
+
+    @value.empty()
+    @value.append =>
+      switch variable.value.type
+        when 'object' then return @renderObject()
+        when 'undefined' then return @renderUndefined()
+        when 'function' then return @renderFunction()
+        else return @renderValue()
+
+    @appendProperties() if variable.value.type is 'object' and variable.isPopulated()
+
+  appendProperties: =>
+    @empty()
+    variable = @variable
+
+    @append $$ ->
+      @ul class: 'list-tree has-collapsable-children', =>
+        @li class: 'list-nested-item collapsed', =>
+          @div class: 'list-item', =>
+            @text "#{variable.name}: Object"
+
+
+
+  renderObject: =>
+    variable = @variable
+    $$ ->
+      @text 'Object'
+
+  renderUndefined: =>
+    $$ ->
+      @text 'undefined'
+
+  renderValue: =>
+    variable = @variable
+
+    $$ ->
+      @text "#{variable.value.value}"
+
+  renderFunction: ->
+    $$ ->
+      @text 'Function'
