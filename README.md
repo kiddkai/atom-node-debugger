@@ -3,6 +3,10 @@ node-debugger package [![Build Status](https://travis-ci.org/kiddkai/atom-node-d
 
 This is a Node.js debugger for atom. Still working on progress. It still buggy now. I still using my spare time to work on it. Please provide me some feedback to make it better.
 
+
+![](https://raw.githubusercontent.com/kiddkai/atom-node-debugger/master/screenshot.gif)
+
+
 Usage
 ------
 
@@ -28,20 +32,20 @@ Done
 2. Run a node process (.js) files
 3. Connect to debugger
 4. Show [stderr/stdout] log
-5. Jump to source when break
+5. Jump to source when `break`
 6. Breakpoint Control
     + add breakpoint
     + show breakpoint in the gutter
     + List breakpoints
-7. Script Control
-8. Continue Control
+7. Script Control[load]
+8. Continue Control[next/step...]
+9. Frame Info[argument/locals]
 
 
 Still working in progress
 
 TODO
 ------
-+ Frame Info
 + Function Scope
 + Evaluate Expression
 + Show variables

@@ -37,7 +37,7 @@ describe 'Set a gutter according to the breakpoints', ->
     ])
     spyOn(editor, 'getPath').andReturn('/path/to/file2.js')
     breakpointGutterView = new BreakpointGutterView(editorView)
-    expect(gutter.addClassToLine).toHaveBeenCalledWith(10, 'gutter-breakpoint')
+    expect(gutter.addClassToLine).toHaveBeenCalledWith(11, 'gutter-breakpoint')
 
   it 'should be able to add the classes to line when editor changed path', ->
     spyOn(debuggerContext.breakpoints, 'getBreakpoints').andReturn([
@@ -47,7 +47,7 @@ describe 'Set a gutter according to the breakpoints', ->
     spyOn(editor, 'getPath').andReturn('/path/to/file1.js')
     breakpointGutterView = new BreakpointGutterView(editorView)
     editorView.trigger 'editor:path-changed'
-    expect(gutter.addClassToLine).toHaveBeenCalledWith(1, 'gutter-breakpoint')
+    expect(gutter.addClassToLine).toHaveBeenCalledWith(2, 'gutter-breakpoint')
 
   it 'should be able to update the classes to line when breakpoints changed', ->
     breakpointGutterView = new BreakpointGutterView(editorView)
@@ -57,4 +57,4 @@ describe 'Set a gutter according to the breakpoints', ->
     }])
     spyOn(editor, 'getPath').andReturn('/path/to/file2.js')
     breakpoints.emit 'change'
-    expect(gutter.addClassToLine).toHaveBeenCalledWith(12, 'gutter-breakpoint');
+    expect(gutter.addClassToLine).toHaveBeenCalledWith(13, 'gutter-breakpoint');

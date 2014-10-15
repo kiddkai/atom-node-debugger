@@ -37,4 +37,4 @@ class BreakpointGutterView
 
     for breakpoint in @breakpoints.getBreakpoints()
       if breakpoint.scriptName is @editor.getPath()
-        @gutter.addClassToLine(breakpoint.line, 'gutter-breakpoint')
+        @gutter.addClassToLine(breakpoint.line + 1, 'gutter-breakpoint')

@@ -43,7 +43,7 @@ class NodeDebuggerView extends View
       .create
         type: 'script'
         target: path
-        line: row
+        line: row - 1
         column: 1
         enabled: true
       .then (breakpoint) ->
