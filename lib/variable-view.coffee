@@ -1,4 +1,5 @@
 {View, $, $$} = require 'atom'
+q = require 'q'
 debuggerContext = require './debugger'
 Variable = require './variable'
 
@@ -30,17 +31,41 @@ class VariableView extends View
 
     @appendProperties() if variable.value.type is 'object' and variable.isPopulated()
 
+  toggleChildren: (e) =>
+    e.stopPropagation()
+    variable = @variable
+    self = this
+    $li = @variableView.children()
+
+
+    show = () ->
+      for variable in variable.value.properties
+        $nextedUl.append new VariableView(variable)
+
+    if not variable.isPropPopulated()
+      $nextedUl = $('<ul class="list-tree has-collapsable-children">')
+      $li.append($nextedUl)
+
+      variable
+        .populateProps()
+        .then(show)
+        .done()
+
+    $li.toggleClass('collapsed')
+
   appendProperties: =>
+    self = this
     @empty()
     variable = @variable
 
-    @append $$ ->
+    @variableView = $$ ->
       @ul class: 'list-tree has-collapsable-children', =>
-        @li class: 'list-nested-item collapsed', =>
+        @li class: 'list-nested-item collapsed', outlet: 'list', =>
           @div class: 'list-item', =>
             @text "#{variable.name}: Object"
 
-
+    @variableView.on 'click', @toggleChildren
+    @append @variableView
 
   renderObject: =>
     variable = @variable

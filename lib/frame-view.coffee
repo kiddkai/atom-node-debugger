@@ -22,6 +22,7 @@ class FrameView extends View
     self = this
     item = @frames.get()
     @argumentList.empty()
+    @variableList.empty()
 
     @argumentList.append $$ ->
       @div class: 'list-item', =>
@@ -31,4 +32,14 @@ class FrameView extends View
       @argumentList.append $$ ->
         @ul class: 'list-tree', =>
           for variable in item.arguments
+            @subview 'variable', new VariableView(variable)
+
+    @variableList.append $$ ->
+      @div class: 'list-item', =>
+        @text 'Locals'
+
+    if item? and item.locals?
+      @variableList.append $$ ->
+        @ul class: 'list-tree', =>
+          for variable in item.locals
             @subview 'variable', new VariableView(variable)

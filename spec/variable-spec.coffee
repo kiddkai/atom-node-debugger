@@ -11,7 +11,7 @@ describe 'Variable', ->
           value:
             ref: 10
         })
-        expect(v.isPopulated()).toBeFalsy()
+        expect(v.isPopulated()).toBeTruthy()
 
 
   describe '::populate', ->
