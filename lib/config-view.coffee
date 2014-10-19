@@ -41,7 +41,9 @@ class ConfigView extends View
           console.error(err) if err?
           @nodePathInput.getEditor().setText(path) if path?
 
-      @nodePathInput.getEditor().setText(path)
+      else
+        @nodePathInput.getEditor().setText(path)
+        
     @appPathInput.getEditor().setText(atom.workspace.getActiveEditor().getPath())
 
 
