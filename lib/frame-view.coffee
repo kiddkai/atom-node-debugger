@@ -1,45 +1,65 @@
 {View, $, $$} = require 'atom'
 debuggerContext = require './debugger'
 VariableView = require './variable-view'
+q = require 'q'
 
 module.exports =
 class FrameView extends View
 
-  @content: =>
+  @content: (frame) =>
     @ul class:'frames-view list-tree has-collapsable-children', =>
-      @li class: 'frames-arguments list-nested-item', outlet: 'argumentList'
-      @li class: 'frames-variables list-nested-item', outlet: 'variableList'
 
   initialize: ->
+    @nthRender = 0
     @frames = debuggerContext.frames
     @frames.refresh().done()
     @frames.on 'change', @render
+    @selected = 0
+    @on 'click', '.frame-item', @activeSelection
+    @on 'click', '.list-nested-item', @toggleCollapsed
 
   beforeRemove: ->
     @frames.removeListener 'change', @render
 
+  toggleCollapsed: (ev) ->
+    ev.stopPropagation()
+    $(this).toggleClass('collapsed')
+
+  activeSelection: (ev) =>
+    $toActive = $(ev.target).closest('.frame-item')
+    @selected = if $toActive.data('index') is @selected then -1 else $toActive.data('index')
+    @render()
+
   render: =>
+    @nthRender += 1
+    @empty()
     self = this
-    item = @frames.get()
-    @argumentList.empty()
-    @variableList.empty()
+    frames = @frames.get()
+    which = @nthRender
 
-    @argumentList.append $$ ->
-      @div class: 'list-item', =>
-        @text 'Arguments'
+    frames.reduce((promise, frame, index) =>
+      return promise.then =>
+        return frame.populate().then(=>
+          return if which < self.nthRender
+          cls = if index is self.selected then 'selected' else 'collapsed'
+          self.append $$ ->
+            @li class: "frame-item list-nested-item #{cls}", 'data-index': index, =>
+              @header class: 'list-item', "#{frame.file} #{frame.line}"
+              @ul class: 'frame-body list-tree has-collapsable-children', =>
+                @li class: 'list-nested-item', =>
+                  @div class: 'list-item', 'local'
+                  @ul class: 'frame-locals list-tree', =>
+                    for prop in frame.locals
+                      @subview 'variable', new VariableView(prop)
 
-    if item? and item.arguments?
-      @argumentList.append $$ ->
-        @ul class: 'list-tree', =>
-          for variable in item.arguments
-            @subview 'variable', new VariableView(variable)
+                @li class: 'list-nested-item collapsed', =>
+                  @div class: 'list-item', 'arguments'
+                  @ul class: 'frame-arguments list-tree', =>
+                    for prop in frame.args
+                      @subview 'variable', new VariableView(prop)
 
-    @variableList.append $$ ->
-      @div class: 'list-item', =>
-        @text 'Locals'
-
-    if item? and item.locals?
-      @variableList.append $$ ->
-        @ul class: 'list-tree', =>
-          for variable in item.locals
-            @subview 'variable', new VariableView(variable)
+                @li class: 'list-nested-item collapsed', =>
+                  @div class: 'list-item', 'this'
+                  # @subview 'variable', new VariableView(frame.context)
+        )
+    , q()).done()

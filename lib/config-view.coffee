@@ -1,20 +1,20 @@
-{View, EditorView} = require 'atom'
+{View, TextEditorView} = require 'atom'
 which = require 'which'
 debuggerContext = require './debugger'
-
+{spawn} = require 'child_process'
 
 module.exports =
 class ConfigView extends View
   @content: ->
     @div class: "config-view", =>
       @div "node path"
-      @subview 'nodePathInput', new EditorView(mini: true)
+      @subview 'nodePathInput', new TextEditorView(mini: true)
 
       @div "application path"
-      @subview 'appPathInput', new EditorView(mini: true)
+      @subview 'appPathInput', new TextEditorView(mini: true)
 
       @div "arguments"
-      @subview 'argumentInput', new EditorView(mini: true)
+      @subview 'argumentInput', new TextEditorView(mini: true)
 
       @div class: "inset-panel padded", =>
         @div class: 'block', =>
@@ -37,9 +37,46 @@ class ConfigView extends View
   autoFill: ->
     which 'node', (err, path) =>
       if err?
-        console.error('Node Can not be found in your path, please start atom in terminal')
-      @nodePathInput.getEditor().setText(path)
+        @findByShell (err, path) =>
+          console.error(err) if err?
+          @nodePathInput.getEditor().setText(path) if path?
+
+      else
+        @nodePathInput.getEditor().setText(path)
+        
     @appPathInput.getEditor().setText(atom.workspace.getActiveEditor().getPath())
+
+
+
+  findByShell: (fn) ->
+    nvm = process.env.NVM_BIN
+
+    if nvm?
+      return fn null, "#{nvm}/node"
+
+    shell = process.env.SHELL
+    path = ''
+    if shell?
+      sh = spawn shell, ['-s', '-l']
+      echo = spawn 'echo', ['which', 'node']
+
+      echo.stdout.pipe(sh.stdin)
+
+      sh
+        .stdout
+        .on 'data', (chunk) =>
+          path += chunk.toString()
+
+      sh
+        .stdout
+        .on 'end', () =>
+          if not path?
+            return fn null, nodePath
+
+          fn(null, path)
+
+    else
+      fn(new Error('Shell is not found'))
 
   startRunning: ->
     @runner.start
