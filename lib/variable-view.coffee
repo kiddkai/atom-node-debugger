@@ -1,87 +1,58 @@
 {View, $, $$} = require 'atom'
 q = require 'q'
 debuggerContext = require './debugger'
-Variable = require './variable'
 
 module.exports =
 class VariableView extends View
 
   @content: =>
-    @li class:'variable-view list-nexted-item', =>
+    @li class:'variable-view', =>
       @div class: 'list-item', =>
         @span outlet: 'name'
+        @text ': '
         @span class: 'variable-value', outlet: 'value'
 
-  initialize: (variable) ->
-    @variable = new Variable(variable)
-    @name.text("#{@variable.name}: ");
+  initialize: (@variable) ->
+    @name.text("#{variable.name}")
+    @render()
+    @expend = false
+    @isObject = false
+    @on 'click', (e) => e.stopPropagation()
+    @on 'click', @toggle
+
+  toggle: (e) =>
+    return if not @isObject
+    @expend = not @expend
     @render()
 
-
   render: =>
-    variable = @variable
-
     @value.empty()
-    @value.append =>
-      switch variable.value.type
-        when 'object' then return @renderObject()
-        when 'undefined' then return @renderUndefined()
-        when 'function' then return @renderFunction()
-        else return @renderValue()
-
-    @appendProperties() if variable.value.type is 'object' and variable.isPopulated()
-
-  toggleChildren: (e) =>
-    e.stopPropagation()
     variable = @variable
     self = this
-    $li = @variableView.children()
 
+    @variable
+      .populate()
+      .then (variable) =>
+        value = variable.value
 
-    show = () ->
-      for variable in variable.value.properties
-        $nextedUl.append new VariableView(variable)
+        if value.type is 'object'
+          self.isObject = true
+          text = '{ Object .. }'
+          self.addClass('list-nested-item').addClass('collapsed')
+          $props = $('<ul class="list-tree">')
+          self.append($props)
 
-    if not variable.isPropPopulated()
-      $nextedUl = $('<ul class="list-tree has-collapsable-children">')
-      $li.append($nextedUl)
+          if self.expend is true
+            text = ''
+            self.removeClass('collapsed')
+            for prop in value.properties
+              $props.append(new VariableView(prop))
 
-      variable
-        .populateProps()
-        .then(show)
-        .done()
+        else if value.type is 'function'
+          text = 'Function'
+        else
+          text = value.text
 
-    $li.toggleClass('collapsed')
+        self.value.text(text)
 
-  appendProperties: =>
-    self = this
-    @empty()
-    variable = @variable
-
-    @variableView = $$ ->
-      @ul class: 'list-tree has-collapsable-children', =>
-        @li class: 'list-nested-item collapsed', outlet: 'list', =>
-          @div class: 'list-item', =>
-            @text "#{variable.name}: Object"
-
-    @variableView.on 'click', @toggleChildren
-    @append @variableView
-
-  renderObject: =>
-    variable = @variable
-    $$ ->
-      @text 'Object'
-
-  renderUndefined: =>
-    $$ ->
-      @text 'undefined'
-
-  renderValue: =>
-    variable = @variable
-
-    $$ ->
-      @text "#{variable.value.value}"
-
-  renderFunction: ->
-    $$ ->
-      @text 'Function'
+      .done()

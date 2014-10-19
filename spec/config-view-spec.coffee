@@ -1,4 +1,4 @@
-{Workspace, EditorView} = require 'atom'
+{Workspace, TextEditorView} = require 'atom'
 ConfigView = require '../lib/config-view'
 
 describe 'config view', ->
@@ -7,7 +7,7 @@ describe 'config view', ->
 
   beforeEach ->
     atom.workspace = new Workspace
-    spyOn(atom.workspace, 'getActiveEditor').andReturn((new EditorView(mini: true)).getEditor())
+    spyOn(atom.workspace, 'getActiveEditor').andReturn((new TextEditorView(mini: true)).getEditor())
 
     configView = new ConfigView(autoFill: false)
 
@@ -16,8 +16,15 @@ describe 'config view', ->
     spyOn(configView.runner, 'start')
 
     # set up data
-    configView.nodePathInput.getEditor().setText('/bin/node')
-    configView.appPathInput.getEditor().setText('/path/to/debug.js')
+    configView
+      .nodePathInput
+      .getEditor()
+      .setText('/bin/node')
+
+    configView
+      .appPathInput
+      .getEditor()
+      .setText('/path/to/debug.js')
 
     configView.startRunning()
 

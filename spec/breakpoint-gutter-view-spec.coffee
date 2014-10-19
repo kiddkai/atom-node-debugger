@@ -1,4 +1,4 @@
-{EditorView} = require 'atom'
+{TextEditorView} = require 'atom'
 BreakpointGutterView = require '../lib/breakpoint-gutter-view'
 debuggerContext = require '../lib/debugger'
 
@@ -10,7 +10,7 @@ describe 'Set a gutter according to the breakpoints', ->
   breakpoints = null
 
   beforeEach ->
-    editorView = new EditorView(mini: true)
+    editorView = new TextEditorView(mini: true)
     editorView.gutter =
       addClassToLine: jasmine.createSpy()
 

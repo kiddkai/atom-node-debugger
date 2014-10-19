@@ -10,9 +10,23 @@
       }
     }
 
-    &.breakpoint {
-      .functional.breakpoint {
-        display: block;
+    &.info {
+      .functional.info {
+        display: -webkit-box;
+        display: flex;
+
+        .breakpoint-view {
+          flex: 1;
+          height: 180px;
+          overflow: scroll;
+        }
+
+        .frames-view {
+          position: relative;
+          flex: 1;
+          height: 180px;
+          overflow: scroll;
+        }
       }
     }
 
