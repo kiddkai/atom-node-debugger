@@ -9,11 +9,10 @@
   "repository": "https://github.com/kiddkai/atom-node-debugger",
   "license": "MIT",
   "engines": {
-    "atom": ">0.50.0"
+    "atom": ">0.140.0"
   },
   "dependencies": {
     "emissary": "^1.3.0",
-    "first-mate": "^2.2.0",
     "lodash": "^2.4.1",
     "node-debugger": "git+https://github.com/kiddkai/node-debugger.git#master",
     "q": "^1.0.1",
