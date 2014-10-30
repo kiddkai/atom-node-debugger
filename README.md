@@ -24,6 +24,8 @@ Add a breakpoint
 ctrl + shift + p -> breakpoint add
 ```
 
+Please click [here](https://github.com/kiddkai/atom-node-debugger/issues/new)
+to provide me more suggestions to improve this debugger, thanks :D
 
 Done
 ------
@@ -40,12 +42,13 @@ Done
 7. Script Control[load]
 8. Continue Control[next/step...]
 9. Frame Info[argument/locals]
+10. Evaluate Expression
+11. Show variables
+
 
 
 Still working in progress
 
 TODO
 ------
-+ Function Scope
-+ Evaluate Expression
-+ Show variables
+- Adapting the latest api for adding the mark to Gutter

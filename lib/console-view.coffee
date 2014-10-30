@@ -21,6 +21,11 @@ class ConsoleView extends View
                 .syntax
                 .grammarForScopeName('source.js')
 
+    if not @grammar?
+      @grammar = atom
+                  .syntax
+                  .grammarForScopeName('text.plain.null-grammar')
+
     if @grammar?
       @inputter
         .getModel()

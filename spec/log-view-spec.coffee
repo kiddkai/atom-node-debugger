@@ -48,11 +48,11 @@ describe 'Log View', ->
       outEnd
 
     runs ->
-      expect(logView.stdoutView.logger.getModel().getText()).toMatch(/this is a stdout line/)
+      expect(logView.stdoutView.logger.text()).toMatch(/this is a stdout line/)
 
   it 'should be able to get the stderr from process', ->
     waitsFor ->
       outEnd
 
     runs ->
-      expect(logView.stdoutView.logger.getModel().getText()).toMatch(/this is a stderr line/)
+      expect(logView.stdoutView.logger.text()).toMatch(/this is a stderr line/)
