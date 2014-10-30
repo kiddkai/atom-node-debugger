@@ -1,5 +1,6 @@
 {View, $, $$} = require 'atom'
 q = require 'q'
+util = require './editor-util'
 debuggerContext = require './debugger'
 
 module.exports =
@@ -13,7 +14,11 @@ class VariableView extends View
         @span class: 'variable-value', outlet: 'value'
 
   initialize: (@variable) ->
-    @name.text("#{variable.name}")
+    if not @variable.name
+      @name.remove()
+    else
+      @name.text("#{@variable.name}")
+
     @render()
     @expend = false
     @isObject = false
@@ -21,6 +26,7 @@ class VariableView extends View
     @on 'click', @toggle
 
   toggle: (e) =>
+    e.stopPropagation()
     return if not @isObject
     @expend = not @expend
     @render()
@@ -29,7 +35,7 @@ class VariableView extends View
     @value.empty()
     variable = @variable
     self = this
-
+    self.find('.variable-props').remove()
     @variable
       .populate()
       .then (variable) =>
@@ -39,20 +45,20 @@ class VariableView extends View
           self.isObject = true
           text = '{ Object .. }'
           self.addClass('list-nested-item').addClass('collapsed')
-          $props = $('<ul class="list-tree">')
-          self.append($props)
 
           if self.expend is true
             text = ''
+            $props = $('<ul class="list-tree variable-props">')
+            self.append($props)
             self.removeClass('collapsed')
             for prop in value.properties
               $props.append(new VariableView(prop))
 
-        else if value.type is 'function'
-          text = 'Function'
         else
-          text = value.text
+          wrapper = if value.type isnt 'string' then '' else '"'
+          text = wrapper + value.text + wrapper
 
-        self.value.text(text)
-
+        self.value.append(util.colorize(text))
+      .catch (e) =>
+        console.log(e)
       .done()

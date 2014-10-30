@@ -18,6 +18,7 @@ class FunctionalView extends View
           @button class: 'btn', 'data-continue': 'in', 'step in'
           @button class: 'btn', 'data-continue': 'next', 'step next'
           @button class: 'btn', 'data-continue': 'out', 'step out'
+          @button class: 'btn btn-error', click: 'stopRunning', 'stop'
 
       # panel area
       @div class: 'functional console inset-panel', =>
@@ -47,3 +48,8 @@ class FunctionalView extends View
     $el = $(e.target)
     action = $el.data('continue')
     debuggerContext.continue(action)
+
+  stopRunning: (e) ->
+    debuggerContext
+      .runner
+      .stop()

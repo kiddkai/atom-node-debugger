@@ -1,4 +1,6 @@
 debuggerContext = require './debugger'
+{$} = require 'atom'
+_ = require 'lodash'
 
 #
 # @param {Script} script
@@ -46,3 +48,18 @@ exports.getFocus = ->
     line: line
     path: path
   }
+
+
+exports.colorize = (line) ->
+  grammar = atom
+              .syntax
+              .grammarForScopeName('source.js')
+
+  tokens = grammar.tokenizeLine(line).tokens;
+
+  return tokens
+    .map (token) ->
+      $ch = $('<span>')
+      $ch.text(token.value)
+      $ch.addClass -> _.uniq(token.scopes.join(' ').split(/\W/)).join(' ')
+      return $ch
