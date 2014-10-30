@@ -22,6 +22,5 @@ describe "NodeDebugger", ->
         activationPromise
 
       runs ->
-        expect(atom.workspaceView.find('.node-debugger')).toExist()
         atom.workspaceView.trigger 'node-debugger:toggle'
         expect(atom.workspaceView.find('.node-debugger')).not.toExist()

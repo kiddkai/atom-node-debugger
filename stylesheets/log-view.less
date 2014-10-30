@@ -3,6 +3,7 @@
 .node-debugger {
   .log-view {
     position: relative;
+    height: 180px;
 
     .controls {
       position: absolute;
@@ -10,26 +11,7 @@
       right: 10px;
       z-index: 10;
     }
-
-    .log {
-      display: none;
-      margin: 10px 0 0 0;
-      padding: 10px;
-      height: 200px;
-      border: 1px solid @base-border-color;
-      overflow: scroll;
-    }
   }
 
-  .log-view.stdout {
-    .log.stdout {
-      display: block;
-    }
-  }
 
-  .log-view.stderr {
-    .log.stderr {
-      display: block;
-    }
-  }
 }

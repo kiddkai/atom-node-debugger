@@ -2,6 +2,7 @@
 through = require 'through2'
 split = require 'split'
 debugContext = require './debugger'
+ConsoleView = require './console-view'
 
 
 module.exports =
@@ -9,7 +10,7 @@ class LogView extends View
 
   @content: =>
     @div class: 'log-view stdout', =>
-      @div class: 'inset-panel log stdout', outlet: "stdoutView"
+      @subview 'stdoutView', new ConsoleView
 
   initialize: ->
     @on 'click', '[data-logtype]', (e) => @switchLogType(e)
@@ -29,9 +30,10 @@ class LogView extends View
     ['stdout', 'stderr'].forEach (outType) ->
       onLine = (chunk, enc, callback) ->
         chunk = chunk.toString('utf-8')
-        $para = $('<p>')
-        $para.text(chunk)
-        $para.appendTo(self.stdoutView)
+        self
+          .stdoutView
+          .appendLine(chunk)
+
         callback()
 
       proc[outType].pipe(split()).pipe(through(onLine))
