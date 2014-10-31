@@ -1,5 +1,6 @@
 node-debugger package [![Build Status](https://travis-ci.org/kiddkai/atom-node-debugger.svg)](https://travis-ci.org/kiddkai/atom-node-debugger) [![Build status](https://ci.appveyor.com/api/projects/status/5b3pwtpbt3k9pdwg)](https://ci.appveyor.com/project/kiddkai/atom-node-debugger)
 ==============================
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/kiddkai/atom-node-debugger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 This is a Node.js debugger for atom. Still working on progress. It still buggy now. I still using my spare time to work on it. Please provide me some feedback to make it better.
 
