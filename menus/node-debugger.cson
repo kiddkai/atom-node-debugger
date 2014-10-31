@@ -2,6 +2,8 @@
 'context-menu':
   '.overlayer':
       'Enable node-debugger': 'node-debugger:toggle'
+  '.line-number':
+  		'Add breakpoint': 'node-debugger:breakpoint-add'
 
 'menu': [
   {
