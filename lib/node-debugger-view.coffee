@@ -21,7 +21,7 @@ class NodeDebuggerView extends View
     @scripts.on 'break', (script, line) =>
       editorUtil.jumpToFile(script, line)
 
-    atom.workspaceView.on "contextmenu", ".line-number", @selectLine
+    atom.workspaceView.on "mousedown", ".line-number", @selectLine
 
   serialize: ->
 
@@ -52,6 +52,9 @@ class NodeDebuggerView extends View
         # do nothing
 
   selectLine: (e) ->
+    if e.which != 3
+      return;
+
     activeEditor = atom.workspace.getActiveEditor()
     row = parseInt(e.target.getAttribute "data-buffer-row", 10)
 
