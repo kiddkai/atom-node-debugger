@@ -2,6 +2,7 @@
 MainView = require './main-view'
 debuggerContext = require './debugger'
 editorUtil = require './editor-util'
+BreakpointGutterView = require './breakpoint-gutter/view'
 
 
 module.exports =
@@ -32,8 +33,12 @@ class NodeDebuggerView extends View
   toggle: ->
     if @hasParent()
       @detach()
+      if @gutterView
+        @gutterView.destroy()
+        @gutterView = null
     else
       atom.workspaceView.appendToBottom(this)
+      @gutterView = new BreakpointGutterView()
 
   addBreakpoint: ->
     activeEditor = atom.workspace.getActiveEditor()
@@ -62,4 +67,3 @@ class NodeDebuggerView extends View
     	row: row,
     	column: activeEditor.getCursorBufferPosition().column
     }
-
