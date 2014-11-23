@@ -15,10 +15,16 @@ class MainView extends View
 
     @append(new ConfigView)
 
-    @runner.on 'change', => @showLoading()
-    @runner.on 'error', => @showConfig()
-    @connection.on 'change', => @onConnectionChange()
-    @connection.on 'error', => @onConnectionChange()
+    @runner.on 'change', @showLoading
+    @runner.on 'error', @showConfig
+    @connection.on 'change', @onConnectionChange
+    @connection.on 'error', @onConnectionChange
+
+  beforeRemove: ->
+    @runner.removeListener 'change', @showLoading
+    @runner.removeListener 'error', @showConfig
+    @connection.removeListener 'change', @onConnectionChange
+    @connection.removeListener 'change', @onConnectionChange
 
   # Returns an object that can be retrieved when package is activated
   serialize: ->
@@ -27,18 +33,18 @@ class MainView extends View
   destroy: ->
     @detach()
 
-  onConnectionChange: ->
+  onConnectionChange: =>
     @empty()
     if @connection._connected
       @append(new FunctionalView)
     else
       @append(new ConfigView)
 
-  showLoading: ->
-    return if not @runner.proc?      
+  showLoading: =>
+    return unless @runner.proc?
     @empty()
     @append(new LoadingView)
 
-  showConfig: ->
+  showConfig: =>
     @empty()
     @append(new ConfigView)

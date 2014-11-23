@@ -35,7 +35,10 @@ class NodeDebuggerView extends View
         @gutterView.destroy()
         @gutterView = null
     else
-      atom.workspaceView.appendToBottom(this)
+      atom.workspace.addBottomPanel({
+        item: this
+        visible: true
+      })
       @gutterView = new BreakpointGutterView()
 
   addBreakpoint: ->

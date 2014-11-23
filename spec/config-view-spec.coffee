@@ -30,5 +30,6 @@ describe 'config view', ->
 
     expect(configView.runner.start).toHaveBeenCalledWith({
       nodePath: '/bin/node',
-      runPath: '/path/to/debug.js'
+      runPath: '/path/to/debug.js',
+      args: ''
     });

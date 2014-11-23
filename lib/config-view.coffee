@@ -43,7 +43,7 @@ class ConfigView extends View
 
       else
         @nodePathInput.getEditor().setText(path)
-        
+
     @appPathInput.getEditor().setText(atom.workspace.getActiveEditor().getPath())
 
 
@@ -82,6 +82,7 @@ class ConfigView extends View
     @runner.start
       nodePath: @nodePathInput.getEditor().getText()
       runPath: @appPathInput.getEditor().getText()
+      args: @argumentInput.getEditor().getText()
 
   toggle: ->
     if @hasParent()

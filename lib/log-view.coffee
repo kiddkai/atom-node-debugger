@@ -20,11 +20,14 @@ class LogView extends View
     if (@runner.proc)
       @listenOutput(@runner.proc)
 
-    @runner.on 'change', => @listenOutput(@runner.proc)
+    @runner.on 'change', @listenOutput
 
-  listenOutput: (proc)->
-    return if not proc?
+  beforeRemove: ->
+    @runner.removeListener 'change', @listenOutput
 
+  listenOutput: () =>
+    return unless @runner.proc
+    proc = @runner.proc
     self = this
 
     ['stdout', 'stderr'].forEach (outType) ->
