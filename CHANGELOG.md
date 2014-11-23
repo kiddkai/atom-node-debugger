@@ -1,3 +1,8 @@
+## 0.2.2 - Release Note
+* Arguments Support
+* Better breakpoint gutter implement #8
+* Bug fix - stop functional working fine now
+
 ## 0.2.1 - Release Note
 * Supports Expression Evaluation
 * Colorize the variables using Grammar
