@@ -1,58 +1,25 @@
-{View} = require 'atom'
-MainView = require './main-view'
-debuggerContext = require './debugger'
-editorUtil = require './editor-util'
-BreakpointGutterView = require './breakpoint-gutter/view'
+App = require './Components/App'
 
+$root = null
+$panel = null
+isInited = false
 
-module.exports =
-class NodeDebuggerView extends View
-  @content: ->
-    @div class: "node-debugger panel", =>
-      @div class: "panel-heading", "Node Debugger"
-      @div class: "panel-body padded" , =>
-        @subview 'mainView', new MainView
+exports.show = (_debugger) ->
+  if not isInited
+    $root = document.createElement('div')
+    App.start($root, _debugger)
 
-  initialize: (serializeState) ->
-    atom.workspaceView.command "node-debugger:toggle", => @toggle()
-    atom.workspaceView.command "node-debugger:breakpoint-add", =>
-      @addBreakpoint()
+  $panel = atom.workspace.addBottomPanel(item: $root)
+  isInited = true
 
-    @scripts = debuggerContext.scripts
-    @scripts.on 'break', (script, line) =>
-      editorUtil.jumpToFile(script, line)
+exports.hide = ->
+  return unless $panel
+  $panel.destroy()
+  atom.workspace.getActivePane().activate()
 
-  serialize: ->
-
-  destroy: ->
-    @mainView.destroy()
-    @detach()
-
-  toggle: ->
-    if @hasParent()
-      @detach()
-      if @gutterView
-        @gutterView.destroy()
-        @gutterView = null
-    else
-      atom.workspace.addBottomPanel({
-        item: this
-        visible: true
-      })
-      @gutterView = new BreakpointGutterView()
-
-  addBreakpoint: ->
-    activeEditor = atom.workspace.getActiveEditor()
-    row = activeEditor.getCursorBufferPosition().row
-    path = activeEditor.getPath()
-
-    debuggerContext
-      .breakpoints
-      .create
-        type: 'script'
-        target: path
-        line: row - 1
-        column: 1
-        enabled: true
-      .then (breakpoint) ->
-        # do nothing
+exports.destroy = ->
+  exports.hide()
+  App.stop()
+  isInited = false
+  $root.remove() if $root?
+  $root = null
