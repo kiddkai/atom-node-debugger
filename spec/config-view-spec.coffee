@@ -1,4 +1,4 @@
-{Workspace, TextEditorView} = require 'atom'
+{TextEditorView} = require 'atom-space-pen-views'
 ConfigView = require '../lib/config-view'
 
 describe 'config view', ->
@@ -6,24 +6,26 @@ describe 'config view', ->
   configView = null
 
   beforeEach ->
-    atom.workspace = new Workspace
-    spyOn(atom.workspace, 'getActiveEditor').andReturn((new TextEditorView(mini: true)).getEditor())
+    atom.workspace = atom.workspace
+
+    spyOn(atom.workspace, 'getActiveTextEditor')
+    .andReturn((new TextEditorView(mini: true)).getModel())
 
     configView = new ConfigView(autoFill: false)
 
-  it 'should be able to create start a node process according to the inputs', ->
+  it 'should be able to start a node process according to the inputs', ->
 
     spyOn(configView.runner, 'start')
 
     # set up data
     configView
       .nodePathInput
-      .getEditor()
+      .getModel()
       .setText('/bin/node')
 
     configView
       .appPathInput
-      .getEditor()
+      .getModel()
       .setText('/path/to/debug.js')
 
     configView.startRunning()
@@ -32,4 +34,4 @@ describe 'config view', ->
       nodePath: '/bin/node',
       runPath: '/path/to/debug.js',
       args: ''
-    });
+    })

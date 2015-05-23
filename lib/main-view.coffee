@@ -1,4 +1,4 @@
-{View} = require 'atom'
+{View} = require 'atom-space-pen-views'
 debuggerContext = require './debugger'
 ConfigView = require './config-view'
 LoadingView = require './loading-view'
@@ -20,7 +20,7 @@ class MainView extends View
     @connection.on 'change', @onConnectionChange
     @connection.on 'error', @onConnectionChange
 
-  beforeRemove: ->
+  detach: ->
     @runner.removeListener 'change', @showLoading
     @runner.removeListener 'error', @showConfig
     @connection.removeListener 'change', @onConnectionChange

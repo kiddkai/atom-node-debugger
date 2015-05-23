@@ -1,6 +1,6 @@
 GutterState = require './state'
 
-module.exports = 
+module.exports =
 class BreakpointGutter
 
   constructor: ->
@@ -15,13 +15,13 @@ class BreakpointGutter
     gutters = @state.gutters
     atom
       .workspace
-      .eachEditor (editor) ->
+      .observeTextEditors (editor) ->
         gutters
           .filter (g) -> g.path is editor.getPath()
           .forEach (g) ->
             marker = editor.markBufferPosition([g.line, 0])
             decoration = editor.decorateMarker(marker, {
-              type: 'gutter'
+              type: 'line-number'
               class: 'gutter-breakpoint'
             })
 

@@ -1,4 +1,4 @@
-{View} = require 'atom'
+{View} = require  'atom-space-pen-views'
 MainView = require './main-view'
 debuggerContext = require './debugger'
 editorUtil = require './editor-util'
@@ -14,12 +14,12 @@ class NodeDebuggerView extends View
         @subview 'mainView', new MainView
 
   initialize: (serializeState) ->
-    atom.workspaceView.command "node-debugger:toggle", => @toggle()
-    atom.workspaceView.command "node-debugger:breakpoint-add", =>
+    atom.commands.add "atom-workspace", "node-debugger:toggle", => @toggle()
+    atom.commands.add "atom-workspace", "node-debugger:breakpoint-add", =>
       @addBreakpoint()
 
     @scripts = debuggerContext.scripts
-    @scripts.on 'break', (script, line) =>
+    @scripts.on 'break', (script, line) ->
       editorUtil.jumpToFile(script, line)
 
   serialize: ->
@@ -42,7 +42,7 @@ class NodeDebuggerView extends View
       @gutterView = new BreakpointGutterView()
 
   addBreakpoint: ->
-    activeEditor = atom.workspace.getActiveEditor()
+    activeEditor = atom.workspace.getActiveTextEditor()
     row = activeEditor.getCursorBufferPosition().row
     path = activeEditor.getPath()
 

@@ -1,4 +1,4 @@
-{TextEditorView, View, $} = require 'atom'
+{TextEditorView, View, $} = require 'atom-space-pen-views'
 debuggerContext = require './debugger'
 VariableView = require './variable-view'
 _ = require 'lodash'
@@ -18,12 +18,12 @@ class ConsoleView extends View
   initialize: ->
 
     @grammar = atom
-                .syntax
+                .grammars
                 .grammarForScopeName('source.js')
 
     if not @grammar?
       @grammar = atom
-                  .syntax
+                  .grammars
                   .grammarForScopeName('text.plain.null-grammar')
 
     if @grammar?
@@ -75,7 +75,7 @@ class ConsoleView extends View
     return unless str?
     $line = $('<div class="line">')
 
-    tokens = @grammar.tokenizeLine(str).tokens;
+    tokens = @grammar.tokenizeLine(str).tokens
 
     $line.append(
       tokens

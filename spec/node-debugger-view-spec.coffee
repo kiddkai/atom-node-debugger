@@ -1,4 +1,3 @@
-{WorkspaceView, Workspace} = require 'atom'
 {EventEmitter} = require 'events'
 NodeDebuggerView = require '../lib/node-debugger-view'
 debuggerContext = require '../lib/debugger'
@@ -9,9 +8,10 @@ describe "NodeDebuggerView", ->
 
   view = null
   scriptsStub = null
+  workspaceElement = null
 
   beforeEach ->
-    atom.workspaceView = new WorkspaceView;
+    workspaceElement = atom.views.getView(atom.workspace)
     scripts = debuggerContext.scripts
     scriptsStub = new EventEmitter
 
@@ -25,4 +25,4 @@ describe "NodeDebuggerView", ->
 
     scriptsStub.emit('break', scriptStub, 10)
 
-    expect(editorUtil.jumpToFile).toHaveBeenCalledWith(scriptStub, 10);
+    expect(editorUtil.jumpToFile).toHaveBeenCalledWith(scriptStub, 10)

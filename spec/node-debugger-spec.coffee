@@ -1,4 +1,3 @@
-{WorkspaceView} = require 'atom'
 NodeDebugger = require '../lib/node-debugger'
 
 # Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
@@ -7,20 +6,20 @@ NodeDebugger = require '../lib/node-debugger'
 # or `fdescribe`). Remove the `f` to unfocus the block.
 describe "NodeDebugger", ->
   activationPromise = null
+  workspaceElement = null
 
   beforeEach ->
-    atom.workspaceView = new WorkspaceView
+    workspaceElement = atom.views.getView(atom.workspace)
     activationPromise = atom.packages.activatePackage('node-debugger')
 
   describe "when the node-debugger:toggle event is triggered", ->
     it "attaches and then detaches the view", ->
-      expect(atom.workspaceView.find('.node-debugger')).not.toExist()
-
-      atom.workspaceView.trigger 'node-debugger:toggle'
+      expect(workspaceElement.querySelector('.node-debugger')).not.toExist()
+      atom.commands.dispatch workspaceElement, 'node-debugger:toggle'
 
       waitsForPromise ->
         activationPromise
 
       runs ->
-        atom.workspaceView.trigger 'node-debugger:toggle'
-        expect(atom.workspaceView.find('.node-debugger')).not.toExist()
+        atom.commands.dispatch workspaceElement, 'node-debugger:toggle'
+        expect(workspaceElement.querySelector('.node-debugger')).not.toExist()

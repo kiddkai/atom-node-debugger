@@ -1,4 +1,4 @@
-{View, $, $$} = require 'atom'
+{View, $, $$} = require 'atom-space-pen-views'
 debuggerContext = require './debugger'
 VariableView = require './variable-view'
 q = require 'q'
@@ -7,7 +7,7 @@ module.exports =
 class FrameView extends View
 
   @content: (frame) =>
-    @ul class:'frames-view list-tree has-collapsable-children', =>
+    @ul class:'frames-view list-tree has-collapsable-children', ->
 
   initialize: ->
     @nthRender = 0
@@ -18,7 +18,7 @@ class FrameView extends View
     @on 'click', '.frame-item', @activeSelection
     @on 'click', '.list-nested-item', @toggleCollapsed
 
-  beforeRemove: ->
+  detach: ->
     @frames.removeListener 'change', @render
 
   toggleCollapsed: (ev) ->

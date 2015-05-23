@@ -1,4 +1,4 @@
-{View, $} = require 'atom'
+{View, $} = require 'atom-space-pen-views'
 through = require 'through2'
 split = require 'split'
 debugContext = require './debugger'
@@ -22,7 +22,7 @@ class LogView extends View
 
     @runner.on 'change', @listenOutput
 
-  beforeRemove: ->
+  detach: ->
     @runner.removeListener 'change', @listenOutput
 
   listenOutput: () =>

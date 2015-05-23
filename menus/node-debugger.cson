@@ -1,9 +1,15 @@
 # See https://atom.io/docs/latest/creating-a-package#menus for more details
 'context-menu':
-  '.overlayer':
-      'Enable node-debugger': 'node-debugger:toggle'
-  '.line-number':
-  		'Add breakpoint': 'node-debugger:breakpoint-add'
+  'atom-text-editor': [
+    {
+      'label': 'Enable node-debugger'
+      'command': 'node-debugger:toggle'
+    },
+    {
+      'label': 'Add breakpoint'
+      'command': 'node-debugger:breakpoint-add'
+    }
+  ]
 
 'menu': [
   {

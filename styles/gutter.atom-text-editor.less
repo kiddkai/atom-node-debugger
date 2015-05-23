@@ -1,0 +1,13 @@
+@import 'ui-variables';
+@import 'octicon-utf-codes';
+
+.gutter .line-number {
+  &.gutter-breakpoint .icon-right {
+    visibility: visible;
+    &:before {
+      color: @text-color-info;
+      content: @primitive-dot;
+      font-size: 1.1em;
+    }
+  }
+}
