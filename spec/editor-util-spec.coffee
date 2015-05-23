@@ -1,4 +1,4 @@
-{Workspace, Editor} = require 'atom'
+{Editor} = require 'atom'
 fs = require 'fs'
 editorUtil = require '../lib/editor-util'
 
@@ -7,9 +7,6 @@ describe 'Editor Util', ->
   scriptStub = null
   promise = null
   editor = null
-
-  beforeEach ->
-    atom.workspace = new Workspace
 
   it 'should be able to jump to a script file', ->
     scriptStub =
@@ -21,7 +18,8 @@ describe 'Editor Util', ->
         editor = e
 
     runs ->
-      expect(editor.getText()).toBe(fs.readFileSync("#{__dirname}/fixtures/sample.js", 'utf-8'))
+      expect(editor.getText())
+        .toBe(fs.readFileSync("#{__dirname}/fixtures/sample.js", 'utf-8'))
 
 
   it 'should be able to set the source when the file can not be open', ->
@@ -35,4 +33,4 @@ describe 'Editor Util', ->
         editor = e
 
     runs ->
-      expect(editor.getText()).toBe('some sources');
+      expect(editor.getText()).toBe('some sources')

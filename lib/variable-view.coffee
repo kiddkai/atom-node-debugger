@@ -1,4 +1,4 @@
-{View, $, $$} = require 'atom'
+{View, $, $$} = require 'atom-space-pen-views'
 q = require 'q'
 util = require './editor-util'
 debuggerContext = require './debugger'
@@ -22,7 +22,7 @@ class VariableView extends View
     @render()
     @expend = false
     @isObject = false
-    @on 'click', (e) => e.stopPropagation()
+    @on 'click', (e) -> e.stopPropagation()
     @on 'click', @toggle
 
   toggle: (e) =>
@@ -38,7 +38,7 @@ class VariableView extends View
     self.find('.variable-props').remove()
     @variable
       .populate()
-      .then (variable) =>
+      .then (variable) ->
         value = variable.value
 
         if value.type is 'object'
@@ -59,6 +59,6 @@ class VariableView extends View
           text = wrapper + value.text + wrapper
 
         self.value.append(util.colorize(text))
-      .catch (e) =>
+      .catch (e) ->
         console.log(e)
       .done()

@@ -3,9 +3,9 @@
   "main": "./lib/node-debugger",
   "version": "0.2.3",
   "description": "Debugger For Nodejs",
-  "activationEvents": [
-    "node-debugger:toggle"
-  ],
+  "activationCommands": {
+    "atom-text-editor": ["node-debugger:toggle"]
+  },
   "repository": "https://github.com/kiddkai/atom-node-debugger",
   "license": "MIT",
   "engines": {
@@ -18,7 +18,8 @@
     "q": "^1.0.1",
     "split": "^0.3.0",
     "through2": "^0.6.1",
-    "which": "^1.0.5"
+    "which": "^1.0.5",
+    "atom-space-pen-views": "^2.0.3"
   },
   "devDependencies": {
     "from": "^0.1.3"

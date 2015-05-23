@@ -1,5 +1,5 @@
 debuggerContext = require './debugger'
-{$} = require 'atom'
+{$} = require 'atom-space-pen-views'
 _ = require 'lodash'
 
 #
@@ -52,10 +52,10 @@ exports.getFocus = ->
 
 exports.colorize = (line) ->
   grammar = atom
-              .syntax
+              .grammars
               .grammarForScopeName('source.js')
 
-  tokens = grammar.tokenizeLine(line).tokens;
+  tokens = grammar.tokenizeLine(line).tokens
 
   return tokens
     .map (token) ->

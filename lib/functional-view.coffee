@@ -1,4 +1,4 @@
-{View, $} = require 'atom'
+{View, $} = require 'atom-space-pen-views'
 LogView = require './log-view'
 BreakpointView = require './breakpoint-view'
 debuggerContext = require './debugger'

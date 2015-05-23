@@ -1,4 +1,4 @@
-{View} = require 'atom'
+{View} = require 'atom-space-pen-views'
 editorUtil = require './editor-util'
 debuggerContext = require './debugger'
 
@@ -33,4 +33,4 @@ class BreakpointItemView extends View
   goToFile: =>
     editorUtil.jumpToFile({
       name: @script.name
-    }, @breakpoint.line);
+    }, @breakpoint.line)

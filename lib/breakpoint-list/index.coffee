@@ -1,4 +1,4 @@
-{View} = require 'atom'
+{View} = require 'atom-space-pen-views'
 State = require './state'
 
 module.exports =
@@ -15,5 +15,5 @@ class BreakpointListView extends View
 
   initialize: ->
     @state = new State()
-    
+
   showBreakpoints: ->

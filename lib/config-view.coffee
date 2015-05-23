@@ -1,4 +1,4 @@
-{View, TextEditorView} = require 'atom'
+{View, TextEditorView} = require 'atom-space-pen-views'
 which = require 'which'
 debuggerContext = require './debugger'
 {spawn} = require 'child_process'
@@ -39,12 +39,13 @@ class ConfigView extends View
       if err?
         @findByShell (err, path) =>
           console.error(err) if err?
-          @nodePathInput.getEditor().setText(path) if path?
+          @nodePathInput.getModel().setText(path) if path?
 
       else
-        @nodePathInput.getEditor().setText(path)
+        @nodePathInput.getModel().setText(path)
 
-    @appPathInput.getEditor().setText(atom.workspace.getActiveEditor().getPath())
+    @appPathInput.getModel()
+      .setText(atom.workspace.getActiveTextEditor().getPath())
 
 
 
@@ -64,12 +65,12 @@ class ConfigView extends View
 
       sh
         .stdout
-        .on 'data', (chunk) =>
+        .on 'data', (chunk) ->
           path += chunk.toString()
 
       sh
         .stdout
-        .on 'end', () =>
+        .on 'end', () ->
           if not path?
             return fn null, nodePath
 
@@ -80,12 +81,12 @@ class ConfigView extends View
 
   startRunning: ->
     @runner.start
-      nodePath: @nodePathInput.getEditor().getText()
-      runPath: @appPathInput.getEditor().getText()
-      args: @argumentInput.getEditor().getText()
+      nodePath: @nodePathInput.getModel().getText()
+      runPath: @appPathInput.getModel().getText()
+      args: @argumentInput.getModel().getText()
 
   toggle: ->
     if @hasParent()
       @detach()
     else
-      atom.workspaceView.appendToBottom(this)
+      atom.workspace.addBottomPanel(this)
