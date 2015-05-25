@@ -6,7 +6,7 @@
   "repository": "https://github.com/kiddkai/atom-node-debugger",
   "license": "MIT",
   "engines": {
-    "atom": ">0.140.0"
+    "atom": ">0.200.0"
   },
   "dependencies": {
     "atom-space-pen-views": "^2.0.5",
