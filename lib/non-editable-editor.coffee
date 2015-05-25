@@ -20,10 +20,6 @@ removeModuleWrapper = (str) ->
 
 module.exports =
 class NonEditableEditorView extends TextEditorView
-  # @content: =>
-  #   # @div class: 'pane-item native-key-bindings padded node-debugger-editor', tabindex: -1,  =>
-  #   # @subview 'editor', new TextEditorView({})
-  #   new TextEditorView({})
   @content: TextEditorView.content
 
   initialize: (opts) ->
@@ -42,7 +38,6 @@ class NonEditableEditorView extends TextEditorView
       @_debugger
         .getScriptById(@id)
         .then (script) =>
-          debugger
           @script = script
           @setText removeModuleWrapper(script.source)
           @onDone()
@@ -63,6 +58,12 @@ class NonEditableEditorView extends TextEditorView
 
   setCursorBufferPosition: (opts)->
     @getModel().setCursorBufferPosition opts, autoscroll: true
+
+  markBufferPosition: (opts) ->
+    @getModel().markBufferPosition(opts)
+
+  decorateMarker: (marker, opts) ->
+    @getModel().decorateMarker(marker, opts)
 
   serialize: ->
     uri: @uri

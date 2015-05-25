@@ -7,6 +7,9 @@ NonEditableEditorView = require './non-editable-editor'
 
 PROTOCOL = 'atom-node-debugger://'
 
+currentMarker = null
+cleanupListener = null
+
 exists = (path) ->
   new Promise (resolve) ->
     fs.exists path, (isExisted) ->
@@ -23,14 +26,15 @@ module.exports = (_debugger) ->
         query: opts
       })
 
-  (breakpoint) ->
+  cleanupListener = _debugger.onBreak (breakpoint) ->
+    currentMarker.destroy() if currentMarker?
     {sourceLine, sourceColumn} = breakpoint
     script = breakpoint.script and breakpoint.script.name
     id = breakpoint.script?.id
     exists(script)
       .then (isExisted)->
         if isExisted
-          atom.workspace.open(script, {
+          promise = atom.workspace.open(script, {
             initialLine: sourceLine
             initialColumn: sourceColumn
             activatePane: true
@@ -39,9 +43,28 @@ module.exports = (_debugger) ->
         else
           return if not id?
           newSourceName = "#{PROTOCOL}#{id}"
-          atom.workspace.open(newSourceName, {
+          promise = atom.workspace.open(newSourceName, {
             initialColumn: sourceColumn
             initialLine: sourceLine
             name: script
             searchAllPanes: true
           })
+
+        return promise
+
+      .then (editor) ->
+        return if not editor?
+        currentMarker = editor.markBufferPosition([
+          sourceLine, sourceColumn
+        ])
+        editor.decorateMarker(currentMarker, {
+          type: 'gutter'
+          class: 'node-debugger-stop-line'
+        })
+
+module.exports.cleanup = ->
+  currentMarker.destroy() if currentMarker?
+
+module.exports.destroy = ->
+  module.exports.cleanup()
+  cleanupListener() if cleanupListener?

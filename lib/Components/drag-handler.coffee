@@ -8,10 +8,13 @@ handleDrag = (ev, broadcast) ->
 
   onmove = (ev) ->
     docHeight = $(document).height()
-    {pageY} = ev
+    docWidth = $(document).width()
+
+    {pageY, pageX} = ev
 
     delta = {
       height: docHeight - pageY
+      sideWidth: docWidth - pageX
     }
 
     broadcast(extend(data, delta))

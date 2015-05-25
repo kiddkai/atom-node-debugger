@@ -4,7 +4,7 @@ Promise = require 'bluebird'
 {Client} = require '_debugger'
 {spawn} = require 'child_process'
 {EventEmitter} = require 'events'
-
+Event = require 'geval/event'
 logger = require './logger'
 
 class ProcessManager extends EventEmitter
@@ -40,8 +40,22 @@ class ProcessManager extends EventEmitter
             appArgs or ''
           ]
 
+        @process = spawn nodePath, args, {
+          detached: true
+        }
 
-        @process = spawn nodePath, args
+        @process.stdout.on 'data', (d) ->
+          logger.info 'child_process', d.toString()
+
+        @process.stderr.on 'data', (d) ->
+          logger.info 'child_process', d.toString()
+
+        @process.stdout.on 'end', () ->
+          logger.info 'child_process', 'end out'
+
+        @process.stderr.on 'end', () ->
+          logger.info 'child_process', 'end errror'
+
         @emit 'procssCreated', @process
 
         @process.once 'error', (e) =>
@@ -56,19 +70,7 @@ class ProcessManager extends EventEmitter
           logger.info 'child_process', 'disconnect'
           @emit 'processEnd', @process
 
-        @process.stdout.on 'data', (d) =>
-          logger.info("child_process #{@process.pid}", d.toString())
-        @process.stderr.on 'data', (d) =>
-          logger.info 'child_process', 'error happend'
-          logger.info("child_process #{@process.pid}", d.toString())
-
         return @process
-
-  getStdOut: ->
-    return @process?.stdout
-
-  getStdErr: ->
-    return @process?.stderr
 
   cleanup: ->
     self = this
@@ -98,9 +100,12 @@ class Debugger extends EventEmitter
     @breakpoints = []
     @client = null
 
+    @onBreakEvent = Event()
+    @onAddBreakpointEvent = Event()
+    @onAddBreakpoint = @onAddBreakpointEvent.listen
+    @onBreak = @onBreakEvent.listen
     @processManager.on 'procssCreated', @start
     @processManager.on 'processEnd', @cleanup
-
 
   stopRetrying: ->
     return unless @timeout?
@@ -110,8 +115,8 @@ class Debugger extends EventEmitter
   listBreakpoints: ->
     new Promise (resolve, reject) =>
       @client.listbreakpoints (err, res) ->
-        return reject(err) if err?
-        resolve(res)
+        return reject(err) if err
+        resolve(res.breakpoints)
 
   step: (type, count) ->
     self = this
@@ -123,7 +128,9 @@ class Debugger extends EventEmitter
   reqContinue: ->
     self = this
     new Promise (resolve, reject) =>
-      @client.reqContinue (err) ->
+      @client.req {
+        command: 'continue'
+      }, (err) ->
         return reject(err) if err
         resolve()
 
@@ -182,13 +189,13 @@ class Debugger extends EventEmitter
         escapedPath = script.replace(/([/\\.?*()^${}|[\]])/g, '\\$1')
         scriptPathRegex = "^(.*[\\/\\\\])?#{escapedPath}$";
         req =
-          type: 'scriptRegExp'
-          target: scriptPathRegex
-          line: line - 1
+          type: 'script'
+          target: script
+          line: line
           condition: condition
 
       @client.setBreakpoint req, (err, res) =>
-        return reject(err) if err?
+        return reject(err) if err
 
         if not scriptId?
           scriptId = res.script_id
@@ -204,6 +211,7 @@ class Debugger extends EventEmitter
 
         @client.breakpoints.push brk
 
+        @onAddBreakpointEvent.broadcast(brk)
         resolve(brk)
 
   clearBreakPoint: (script, line) ->
@@ -235,6 +243,12 @@ class Debugger extends EventEmitter
     )(@client.breakpoints)
 
 
+  fullTrace: () ->
+    new Promise (resolve, reject) =>
+      @client.fullTrace (err, res) ->
+        return reject(err) if err
+        resolve(res)
+
   start: =>
     logger.info 'debugger', 'start connect to process'
     self = this
@@ -262,9 +276,13 @@ class Debugger extends EventEmitter
     @client.once 'ready', @bindEvents
 
     @client.on 'unhandledResponse', (res) => @emit 'unhandledResponse', res
-    @client.on 'break', (res) => @emit 'break', res.body
+    @client.on 'break', (res) =>
+      @onBreakEvent.broadcast(res.body)
+      @emit 'break', res.body
     @client.on 'exception', (res) => @emit 'exception', res.body
     @client.on 'error', onConnectionError
+    @client.on 'close', () ->
+      logger.info 'client', 'client closed'
 
     attemptConnect()
 
@@ -278,6 +296,22 @@ class Debugger extends EventEmitter
         .then =>
           @emit 'close'
 
+  lookup: (ref) ->
+    new Promise (resolve, reject) =>
+      @client.reqLookup [ref], (err, res) ->
+        return reject(err) if err
+        resolve(res[ref])
+
+  eval: (text) ->
+    new Promise (resolve, reject) =>
+      @client.req {
+        command: 'evaluate'
+        arguments: {
+          expression: text
+        }
+      }, (err, result) ->
+        return reject(err) if err
+        return resolve(result)
 
   cleanup: =>
     return unless @client?

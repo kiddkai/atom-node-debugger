@@ -1,6 +1,13 @@
 hg = require 'mercury'
 {h} = hg
 
+BTN_ICON_MAP = {
+  'continue': 'icon-playback-play btn btn-primary'
+  'next': 'icon-chevron-right btn btn-primary'
+  'out': 'icon-chevron-up btn btn-primary'
+  'in': 'icon-chevron-down btn btn-primary'
+}
+
 exports.StepButton = (_debugger) ->
   onNext = (state) ->
     type = state.type()
@@ -17,8 +24,6 @@ exports.StepButton = (_debugger) ->
     .catch (e) ->
       state.waiting(false)
 
-
-
   StepButton = (name, type) ->
     hg.state({
       title: hg.value(name)
@@ -32,12 +37,11 @@ exports.StepButton = (_debugger) ->
   StepButton.render = (state) ->
     channels = state.channels()
 
-    h 'div.btn.btn-primary.inline-block-tight', {
+    h 'div', {
       'ev-click': hg.send channels.next
-      'data-type': state.type
+      'className': BTN_ICON_MAP[state.type()]
       'distabled': !state.waiting
     }, [
-      state.title()
     ]
 
   return StepButton

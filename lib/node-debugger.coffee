@@ -1,5 +1,5 @@
 NodeDebuggerView = require './node-debugger-view'
-
+Event = require 'geval'
 {CompositeDisposable} = require 'atom'
 {Debugger, ProcessManager} = require './debugger'
 jumpToBreakpoint = require './jump-to-breakpoint'
@@ -7,14 +7,14 @@ logger = require './logger'
 
 processManager = null
 _debugger = null
+onBreak = null
 
-initNotifications: (_debugger) ->
+initNotifications = (_debugger) ->
   _debugger.on 'connected', ->
     atom.notifications.addSuccess('connected, enjoy debugging : )')
 
   _debugger.on 'disconnected', ->
     atom.notifications.addInfo('finish debugging : )')
-
 
 module.exports =
   nodeDebuggerView: null
@@ -42,7 +42,7 @@ module.exports =
     @disposables = new CompositeDisposable()
     processManager = new ProcessManager(atom)
     _debugger = new Debugger(atom, processManager)
-    _debugger.on 'break', jumpToBreakpoint(_debugger)
+    initNotifications(_debugger)
     @disposables.add atom.commands.add('atom-workspace', {
       'node-debugger:debug-current-file': => @start(type: 'current')
       'node-debugger:debug-project': => @start(type: 'project')
@@ -50,6 +50,8 @@ module.exports =
       'node-debugger:add-breakpoint': @addBreakpoint
       'node-debugger:remove-breakpoint': @removeBreakpoint
     })
+
+    jumpToBreakpoint(_debugger)
 
   start: ({type}) =>
     afterStarted = null
@@ -63,6 +65,10 @@ module.exports =
   runProject: ->
 
   addBreakpoint: =>
+    editor = atom.workspace.getActiveTextEditor()
+    path = editor.getPath()
+    {row} = editor.getCursorBufferPosition()
+    _debugger.addBreakpoint(path, row)
 
   removeBreakpoint: =>
 
@@ -70,9 +76,11 @@ module.exports =
     processManager.cleanup()
     _debugger.cleanup()
     NodeDebuggerView.destroy()
+    jumpToBreakpoint.cleanup()
 
   deactivate: ->
     logger.info 'deactive', 'stop running plugin'
+    jumpToBreakpoint.destroy()
     @stop()
     @disposables.dispose()
     NodeDebuggerView.destroy()

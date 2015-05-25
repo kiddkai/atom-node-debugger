@@ -1,0 +1,38 @@
+// The ui-variables file is provided by base themes provided by Atom.
+//
+// See https://github.com/atom/atom-dark-ui/blob/master/stylesheets/ui-variables.less
+// for a full listing of what's available.
+@import "ui-variables";
+
+.node-debugger {
+  color: @text-color;
+  height: 250px;
+}
+
+.node-debugger-editor {
+  position: relative;
+  overflow: auto;
+}
+
+.debugger-panel-heading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 33px;
+  line-height: 33px;
+  flex-basis: 33px;
+  vertical-align: middle;
+  background-color: @panel-heading-background-color;
+  padding: 0 10px;
+}
+
+.list-item.heading {
+  background-color: @panel-heading-background-color;
+}
+
+.debugger-vertical-pane {
+}
+
+atom-text-editor::shadow .gutter .line-number.node-debugger-stop-line {
+  color: #F00;
+}

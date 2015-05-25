@@ -1,8 +1,10 @@
 var b = require('./b')
   , result
 
-
 var c = 100;
+var e = {
+  foo: 'bar'
+}
 
 console.log('this is a log')
 console.error('this is an error')
