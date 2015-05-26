@@ -1,8 +1,7 @@
 node-debugger package
 ==============================
 
-This is a Node.js debugger for atom. Still working on progress. It still buggy now. I still using my spare time to work on it. Please provide me some feedback to make it better.
-
+> A simple Node.js/io.js debugger for daily use.
 
 Usage
 ------
@@ -36,3 +35,11 @@ ctrl + shift + p -> breakpoint add
 
 Please click [here](https://github.com/kiddkai/atom-node-debugger/issues/new)
 to provide me more suggestions to improve this debugger, thanks :D
+
+### Known issues
+
+In `Node.js>=0.12` and `io.js`. The process doesn't stop when your process finished.
+So it will have no response from debugger server and will not keep going debugging.
+When you face that issue, just use the `x` button to stop the process by yourself.
+
+Issue report is here: https://github.com/nodejs/io.js/issues/1788
