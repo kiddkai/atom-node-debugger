@@ -1,7 +1,7 @@
 {
   "name": "node-debugger",
   "main": "./lib/node-debugger",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Debugger For Nodejs",
   "repository": "https://github.com/kiddkai/atom-node-debugger",
   "license": "MIT",
