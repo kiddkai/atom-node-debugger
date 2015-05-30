@@ -2,7 +2,7 @@ R = require 'ramda'
 psTree = require 'ps-tree'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
-{spawn} = require 'child_process'
+childprocess = require 'child_process'
 {EventEmitter} = require 'events'
 Event = require 'geval/event'
 logger = require './logger'
@@ -40,7 +40,7 @@ class ProcessManager extends EventEmitter
             appArgs or ''
           ]
 
-        @process = spawn nodePath, args, {
+        @process = childprocess.spawn nodePath, args, {
           detached: true
         }
 
