@@ -55,7 +55,6 @@ exports.create = (_debugger) ->
       lines: hg.array([])
     })
 
-    debugger
     input.onEvalOrResult (text) ->
       state.lines.push(text)
 
