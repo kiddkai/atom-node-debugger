@@ -159,11 +159,6 @@ class Debugger extends EventEmitter
   toggleBreakpoint: (editor, script, line) ->
     new Promise (resolve, reject) =>
 
-      # todo: code duplicated
-      #findMatch = R.find (breakpoint) =>
-      #  if breakpoint.scriptId is script or breakpoint.scriptReq is script or (breakpoint.script and breakpoint.script.indexOf(script) isnt -1)
-      #    return breakpoint.line is (line+1);
-
       match = @tryGetBreakpoint(script, line)
       if match
         @clearBreakPoint(script, line)
