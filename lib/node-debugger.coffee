@@ -44,33 +44,37 @@ module.exports =
     _debugger = new Debugger(atom, processManager)
     initNotifications(_debugger)
     @disposables.add atom.commands.add('atom-workspace', {
-      'node-debugger:debug-current-file': => @start(type: 'current')
-      'node-debugger:debug-project': => @start(type: 'project')
+      'node-debugger:start-resume': @startOrResume
       'node-debugger:stop': @stop
-      'node-debugger:add-breakpoint': @addBreakpoint
-      'node-debugger:remove-breakpoint': @removeBreakpoint
+      'node-debugger:toggle-breakpoint': @toggleBreakpoint
+      'node-debugger:step-next': @stepNext
+      'node-debugger:step-in': @stepIn
+      'node-debugger:step-out': @stepOut
     })
 
     jumpToBreakpoint(_debugger)
 
-  start: ({type}) =>
-    afterStarted = null
-    if type is 'project'
-      afterStarted = @runProject()
+  startOrResume: =>
+    if _debugger.isConnected()
+      _debugger.reqContinue()
     else
-      afterStarted = processManager.start()
+      processManager.start()
+      NodeDebuggerView.show(_debugger)
 
-    NodeDebuggerView.show(_debugger)
-
-  runProject: ->
-
-  addBreakpoint: =>
+  toggleBreakpoint: =>
     editor = atom.workspace.getActiveTextEditor()
     path = editor.getPath()
     {row} = editor.getCursorBufferPosition()
-    _debugger.addBreakpoint(path, row)
+    _debugger.toggleBreakpoint(editor, path, row)
 
-  removeBreakpoint: =>
+  stepNext: =>
+    _debugger.step('next', 1)
+
+  stepIn: =>
+    _debugger.step('in', 1)
+
+  stepOut: =>
+    _debugger.step('out', 1)
 
   stop: =>
     processManager.cleanup()
