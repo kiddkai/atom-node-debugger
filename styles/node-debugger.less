@@ -33,6 +33,15 @@
 .debugger-vertical-pane {
 }
 
-atom-text-editor::shadow .gutter .line-number.node-debugger-stop-line {
-  color: #F00;
+atom-text-editor::shadow {
+  .gutter .line-number {
+      &.node-debugger-stop-line:before {
+        content: ">";
+        color: @text-color
+      }
+
+      &.node-debugger-breakpoint {
+        background-color: #F00;
+      }
+  }
 }

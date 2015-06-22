@@ -86,7 +86,7 @@ class ProcessManager extends EventEmitter
       logger.info 'child_process', 'start killing process'
       psTree @process.pid, (err, children) =>
         logger.info 'child_process_children', children
-        spawn 'kill', ['-9'].concat(children.map((p) -> p.PID))
+        childprocess.spawn 'kill', ['-9'].concat(children.map((p) -> p.PID))
         self.process.kill() if self.process?
 
 
@@ -102,10 +102,13 @@ class Debugger extends EventEmitter
 
     @onBreakEvent = Event()
     @onAddBreakpointEvent = Event()
-    @onAddBreakpoint = @onAddBreakpointEvent.listen
+    @onRemoveBreakpointEvent = Event()
     @onBreak = @onBreakEvent.listen
+    @onAddBreakpoint = @onAddBreakpointEvent.listen
+    @onRemoveBreakpoint = @onRemoveBreakpointEvent.listen
     @processManager.on 'procssCreated', @start
     @processManager.on 'processEnd', @cleanup
+    @markers = []
 
   stopRetrying: ->
     return unless @timeout?
@@ -147,7 +150,22 @@ class Debugger extends EventEmitter
         return reject(err) if err
         resolve(res[0])
 
-  addBreakpoint: (script, line, condition, silent) =>
+  tryGetBreakpoint: (script, line) =>
+    findMatch = R.find (breakpoint) =>
+      if breakpoint.scriptId is script or breakpoint.scriptReq is script or (breakpoint.script and breakpoint.script.indexOf(script) isnt -1)
+        return breakpoint.line is (line+1);
+    return findMatch(@client.breakpoints)
+
+  toggleBreakpoint: (editor, script, line) ->
+    new Promise (resolve, reject) =>
+
+      match = @tryGetBreakpoint(script, line)
+      if match
+        @clearBreakPoint(script, line)
+      else
+        @addBreakpoint(editor, script, line)
+
+  addBreakpoint: (editor, script, line, condition, silent) =>
     new Promise (resolve, reject) =>
       if script is undefined
         script = @client.currentScript;
@@ -210,38 +228,35 @@ class Debugger extends EventEmitter
           scriptReq: script
 
         @client.breakpoints.push brk
-
+        brk.marker = @markLine(editor, brk)
         @onAddBreakpointEvent.broadcast(brk)
         resolve(brk)
 
+
   clearBreakPoint: (script, line) ->
-    findMatch = R.find (breakpoint) =>
-      if breakpoint.scriptId is script or breakpoint.scriptReq is script or (breakpoint.script and breakpoint.script.indexOf(script) isnt -1)
-        return breakpoint.line is line;
+    self = this
+    getbrk =
+      () ->
+        new Promise (resolve, reject) =>
+              match = self.tryGetBreakpoint(script, line)
+              return reject() if not match?
+              resolve({
+                    breakpoint: match
+                    index: self.client.breakpoints.indexOf match
+                  })
+    clearbrk =
+      (brk) ->
+        new Promise (resolve, reject) =>
+            self.client.clearBreakpoint { breakpoint: brk.breakpoint.id }, (err) =>
+              return reject(err) if err
+              self.client.breakpoints.splice brk.index, 1
+              markerIndex = self.markers.indexOf(brk.breakpoint.marker)
+              self.markers.splice(markerIndex, 1)
+              brk.breakpoint.marker.destroy()
+              self.onRemoveBreakpointEvent.broadcast(brk)
+              resolve()
 
-    toBrk = R.map (breakpoint) =>
-      return {
-        breakpoint: breakpoint
-        index: @client.breakpoints.indexOf breakpoint
-      }
-
-    clearOne = (brk) =>
-      new Promise (resolve, reject) =>
-        @client.clearBreakPoint { breakpoint: brk.breakpoint.id }, (err) =>
-          return reject(err) if err?
-          @client.breakpoints.splice brk.index, 1
-          resolve()
-
-    clearEach = (brks) ->
-      Promise.resolve(brks).map clearOne
-
-
-    return R.compose(
-      clearEach
-      toBrk,
-      findMatch
-    )(@client.breakpoints)
-
+    getbrk().then(clearbrk)
 
   fullTrace: () ->
     new Promise (resolve, reject) =>
@@ -314,11 +329,30 @@ class Debugger extends EventEmitter
         return resolve(result)
 
   cleanup: =>
-    return unless @client?
-    @emit 'disconnected'
-    @client.destroy()
-    @client = null
+      return unless @client?
+      @removeBreakpointMarkers()
+      @removeDecorations()
+      @client.destroy()
+      @client = null
+      @emit 'disconnected'
 
+  markLine: (editor, breakPoint) ->
+      marker = editor.markBufferPosition([breakPoint.line-1, 0], invalidate: 'never')
+      editor.decorateMarker(marker, type: 'line-number', class: 'node-debugger-breakpoint')
+      @markers.push marker
+      return marker
+
+  removeBreakpointMarkers: =>
+      return unless @client?
+      breakpoint.marker.destroy() for breakpoint in @client.breakpoints
+
+  removeDecorations: ->
+      return unless @markers?
+      marker.destroy() for marker in @markers
+      @markers = []
+
+  isConnected: =>
+      return @client?
 
 exports.ProcessManager = ProcessManager
 exports.Debugger = Debugger

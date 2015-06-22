@@ -8,5 +8,9 @@
 # For more detailed documentation see
 # https://atom.io/docs/latest/advanced/keymaps
 'atom-workspace':
-  'ctrl-alt-n': 'node-debugger:toggle'
-  'ctrl-alt-t': 'node-debugger:breakpoint-toggle'
+  'f5': 'node-debugger:start-resume'
+  'shift-f5': 'node-debugger:stop'
+  'f9': 'node-debugger:toggle-breakpoint'
+  'f10': 'node-debugger:step-next'
+  'f11': 'node-debugger:step-in'
+  'shift-f11': 'node-debugger:step-out'

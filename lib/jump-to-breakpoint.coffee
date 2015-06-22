@@ -58,7 +58,7 @@ module.exports = (_debugger) ->
           sourceLine, sourceColumn
         ])
         editor.decorateMarker(currentMarker, {
-          type: 'gutter'
+          type: 'line-number'
           class: 'node-debugger-stop-line'
         })
 

@@ -6,9 +6,6 @@ ToggleTree = require './ToggleTree'
 
 exports.create = (_debugger) ->
 
-  removeAddBreak = null
-  removeListener = null
-
   BreakpointPanel = () ->
     state = hg.state({
       rootToggle: ToggleTree.state('Breakpoints')
@@ -32,8 +29,9 @@ exports.create = (_debugger) ->
             state.breakpoints.set(brks)
 
 
-    removeAddBreak = _debugger.onAddBreakpoint refresh
-    removeListener = _debugger.onBreak refresh
+    _debugger.onAddBreakpoint refresh
+    _debugger.onRemoveBreakpoint refresh
+    _debugger.onBreak refresh
 
     return state
 
