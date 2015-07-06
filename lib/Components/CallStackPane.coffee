@@ -69,17 +69,25 @@ exports.create = (_debugger) ->
     .lookup(state.ref())
     .then (detail) ->
       Promise
-      .map detail.properties, (prop) -> _debugger.lookup(prop.ref)
+      .map detail.properties, (prop) ->
+        _debugger.lookup(prop.ref)
       .then (values) ->
         values.forEach (value, idx) ->
           detail.properties[idx].value = value
-
         return detail
     .then (detail) ->
       state.loaded.set(true)
       state.loading.set(false)
       detail.properties.forEach (prop) ->
-        state.properties.push(Value(prop))
+        state.properties.push(Value({
+          name: prop.name
+          value: {
+            ref: prop.ref
+            type: prop.value.type
+            className: prop.value.className
+            value: prop.value.value
+          }
+        }))
 
     .catch (e) ->
       state.loaded.set(false)
@@ -195,7 +203,7 @@ exports.create = (_debugger) ->
             className: if frame.localsOn then '' else 'collapsed'
           }, [
               h('div.list-item', {
-                'ev-click': hg.send frame.channels.localsToggle  
+                'ev-click': hg.send frame.channels.localsToggle
               }, [
                 'variables'
               ])
