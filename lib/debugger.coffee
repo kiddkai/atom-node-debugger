@@ -77,7 +77,7 @@ class ProcessManager extends EventEmitter
     new Promise (resolve, reject) =>
       return resolve() if not @process?
       if @process.exitCode
-        logger.info 'child_process_children', 'process already exited with code ' + @process.exitcode
+        logger.info 'child_process', 'process already exited with code ' + @process.exitcode
         @process = null
         return resolve()
 
