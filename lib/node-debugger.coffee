@@ -4,6 +4,7 @@ Event = require 'geval'
 {Debugger, ProcessManager} = require './debugger'
 jumpToBreakpoint = require './jump-to-breakpoint'
 logger = require './logger'
+os = require 'os'
 
 processManager = null
 _debugger = null
@@ -21,7 +22,7 @@ module.exports =
   config:
     nodePath:
       type: 'string'
-      default: '/bin/node'
+      default: if os.platform() is 'win32' then 'node.exe' else '/bin/node'
     debugPort:
       type: 'number'
       minium: 5857
