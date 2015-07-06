@@ -18,6 +18,30 @@ exports.create = (_debugger) ->
       ))
     ])
 
+  class HistoryTracker
+    constructor: (editor) ->
+      @editor = editor
+      @cmdHistory = []
+      @cmdHistoryIndex = -1
+
+    update: (text) ->
+      if not(@cmdHistoryIndex >= 0 and
+             @cmdHistoryIndex < @cmdHistory.length and
+             @cmdHistory[@cmdHistoryIndex] is text)
+        @cmdHistoryIndex = @cmdHistory.length
+        @cmdHistory.push text
+      @historyMode = false
+    moveUp: ->
+      if @cmdHistoryIndex > 0 and @historyMode
+        @cmdHistoryIndex--
+      @editor.setText(@cmdHistory[@cmdHistoryIndex])
+      @historyMode = true
+    moveDown: ->
+      if @cmdHistoryIndex < @cmdHistory.length - 1 and @historyMode
+        @cmdHistoryIndex++
+      @editor.setText(@cmdHistory[@cmdHistoryIndex])
+      @historyMode = true
+
   class ConsoleInput
     constructor: (@debugger)->
       @type = "Widget"
@@ -28,20 +52,27 @@ exports.create = (_debugger) ->
       self = this
       @editorView = new TextEditorView(mini: true)
       @editor = @editorView.getModel()
+      @historyTracker = new HistoryTracker(@editor)
 
       @editorView.on 'keyup', (ev) ->
         {keyCode} = ev
-        if keyCode is 13
-          text = self.editor.getText()
-          self._changer.broadcast(text)
-          self.editor.setText('')
-          self
-            .debugger
-            .eval(text)
-            .then (result) ->
-              self._changer.broadcast(result.text)
-            .catch (e) ->
-              self._changer.broadcast(e.message)
+        switch keyCode
+          when 13
+            text = self.editor.getText()
+            self._changer.broadcast(text)
+            self.editor.setText('')
+            self.historyTracker.update(text)
+            self
+              .debugger
+              .eval(text)
+              .then (result) ->
+                self._changer.broadcast(result.text)
+              .catch (e) ->
+                self._changer.broadcast(e.message)
+          when 38
+            self.historyTracker.moveUp()
+          when 40
+            self.historyTracker.moveDown()
 
       return @editorView.get(0)
 
