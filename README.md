@@ -9,7 +9,7 @@ Open a javascript (.js) file and execute the start-resume command (F5) to launch
 
 Debug panels will show up as shown in the image below.
 
-![Screenshot of node-debugger in action](/screenshot.jpg)
+![Screenshot of node-debugger in action](https://raw.githubusercontent.com/kiddkai/atom-node-debugger/master/screenshot.jpg)
 
 The '>' symbol in the gutter marks the current line of execution.
 
