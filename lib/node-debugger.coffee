@@ -32,8 +32,10 @@ module.exports =
       default: '127.0.0.1'
     nodeArgs:
       type: 'string'
+      default: ''
     appArgs:
       type: 'string'
+      default: ''
     isCoffeeScript:
       type: 'boolean'
       default: false

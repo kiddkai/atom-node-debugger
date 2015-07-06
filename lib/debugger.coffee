@@ -7,6 +7,8 @@ childprocess = require 'child_process'
 Event = require 'geval/event'
 logger = require './logger'
 
+dropEmpty = R.reject(R.isEmpty)
+
 class ProcessManager extends EventEmitter
   constructor: (@atom = atom)->
     super()
@@ -15,10 +17,10 @@ class ProcessManager extends EventEmitter
   start: (file) ->
     @cleanup()
       .then =>
-        nodePath = @atom.config.get('atom-node-debugger.nodePath')
-        appArgs = @atom.config.get('atom-node-debugger.appArgs')
-        port = @atom.config.get('atom-node-debugger.debugPort')
-        isCoffee = @atom.config.get('atom-node-debugger.isCoffeeScript')
+        nodePath = @atom.config.get('node-debugger.nodePath')
+        appArgs = @atom.config.get('node-debugger.appArgs')
+        port = @atom.config.get('node-debugger.debugPort')
+        isCoffee = @atom.config.get('node-debugger.isCoffeeScript')
 
         appPath = @atom
           .workspace
@@ -40,7 +42,9 @@ class ProcessManager extends EventEmitter
             appArgs or ''
           ]
 
-        @process = childprocess.spawn nodePath, args, {
+        logger.error 'spawn', dropEmpty(args)
+
+        @process = childprocess.spawn nodePath, dropEmpty(args), {
           detached: true
         }
 
@@ -54,12 +58,12 @@ class ProcessManager extends EventEmitter
           logger.info 'child_process', 'end out'
 
         @process.stderr.on 'end', () ->
-          logger.info 'child_process', 'end errror'
+          logger.info 'child_process', 'end error'
 
         @emit 'procssCreated', @process
 
         @process.once 'error', (e) =>
-          logger.info 'child_process error', e
+          logger.error 'child_process error', e
           @emit 'processEnd', e
 
         @process.once 'close', () =>
@@ -279,8 +283,8 @@ class Debugger extends EventEmitter
         return
       attemptConnectCount++
       self.client.connect(
-        self.atom.config.get('atom-node-debugger.debugPort'),
-        self.atom.config.get('atom-node-debugger.debugHost')
+        self.atom.config.get('node-debugger.debugPort'),
+        self.atom.config.get('node-debugger.debugHost')
       )
 
     onConnectionError = =>
@@ -333,12 +337,12 @@ class Debugger extends EventEmitter
         return resolve(result)
 
   cleanup: =>
-      return unless @client?
-      @removeBreakpointMarkers()
-      @removeDecorations()
-      @client.destroy()
-      @client = null
-      @emit 'disconnected'
+    return unless @client?
+    @removeBreakpointMarkers()
+    @removeDecorations()
+    @client.destroy()
+    @client = null
+    @emit 'disconnected'
 
   markLine: (editor, breakPoint) ->
       marker = editor.markBufferPosition([breakPoint.line-1, 0], invalidate: 'never')
