@@ -76,6 +76,10 @@ class ProcessManager extends EventEmitter
     self = this
     new Promise (resolve, reject) =>
       return resolve() if not @process?
+      if @process.exitCode
+        logger.info 'child_process_children', 'process already exited with code ' + @process.exitcode
+        @process = null
+        return resolve()
 
       onProcessEnd = R.once =>
         logger.info 'child_process', 'die'
