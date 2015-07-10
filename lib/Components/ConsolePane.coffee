@@ -41,8 +41,10 @@ exports.create = (_debugger) ->
             .then (result) ->
               self._changer.broadcast(result.text)
             .catch (e) ->
-              self._changer.broadcast(e.message)
-
+              if e.message?
+                self._changer.broadcast(e.message)
+              else
+                self._changer.broadcast(e)
       return @editorView.get(0)
 
     update: (prev, el) ->

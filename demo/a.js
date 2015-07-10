@@ -7,10 +7,12 @@ var e = {
   numval1: 10,
   boolval1: true,
   strval1: 'str',
+  arrVal1: [1,2,3,4],
   objval1: {
     numval2: 20,
     boolval2: true,
     strval2: 'str2',
+    arrVal2: [2,3,4,5],
     objval2: {
       numval3: 30,
       boolval3: true,
@@ -20,6 +22,7 @@ var e = {
 }
 
 var strVal = "a string value";
+var arrVal = [1,2,3,4];
 
 function localFunc(arg1, arg2) {
   var zz = 10;
