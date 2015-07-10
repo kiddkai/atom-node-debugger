@@ -1,5 +1,5 @@
 R = require 'ramda'
-psTree = require 'ps-tree'
+kill = require 'tree-kill'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
 childprocess = require 'child_process'
@@ -92,11 +92,7 @@ class ProcessManager extends EventEmitter
         resolve()
 
       logger.info 'child_process', 'start killing process'
-      psTree @process.pid, (err, children) =>
-        logger.info 'child_process_children', children
-        childprocess.spawn 'kill', ['-9'].concat(children.map((p) -> p.PID))
-        self.process.kill() if self.process?
-
+      kill @process.pid
 
       @process.once 'disconnect', onProcessEnd
       @process.once 'exit', onProcessEnd
