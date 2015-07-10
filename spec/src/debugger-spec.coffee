@@ -15,9 +15,9 @@ describe 'ProcessManager', ->
     it 'starts a process base on the atom config and if no file specify', ->
 
       mapping = {
-        'atom-node-debugger.nodePath': '/bin/node'
-        'atom-node-debugger.appArgs': '--name'
-        'atom-node-debugger.debugPort': 5858
+        'node-debugger.nodePath': '/path/to/node'
+        'node-debugger.appArgs': '--name'
+        'node-debugger.debugPort': 5860
       }
 
       atomStub =
@@ -33,4 +33,9 @@ describe 'ProcessManager', ->
       waitsForPromise () ->
         manager.start().then () ->
           expect(childprocess.spawn).toHaveBeenCalled()
-          expect(childprocess.spawn).toHaveBeenCalledWith('/bin/node')
+          # expect(childprocess.spawn).toHaveBeenCalledWith('/path/to/node', ['--debug-brk=5860', '/path/to/file.js', '--name', { detached : true }])
+          # cannot get the toHaveBeenCalledWith to match the arguments so this method is used instead to verify the call
+          expect(childprocess.spawn.mostRecentCall.args[0]).toEqual('/path/to/node')
+          expect(childprocess.spawn.mostRecentCall.args[1][0]).toEqual('--debug-brk=5860')
+          expect(childprocess.spawn.mostRecentCall.args[1][1]).toEqual('/path/to/file.js')
+          expect(childprocess.spawn.mostRecentCall.args[1][2]).toEqual('--name')
