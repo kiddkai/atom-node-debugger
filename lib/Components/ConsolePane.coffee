@@ -4,6 +4,7 @@ Event = require 'geval/event'
 stream = require 'stream'
 hg = require 'mercury'
 {h} = hg
+{CommandHistory} = require './consolepane-utils'
 
 exports.create = (_debugger) ->
   jsGrammar = atom.grammars.grammarForScopeName('source.js')
@@ -28,20 +29,30 @@ exports.create = (_debugger) ->
       self = this
       @editorView = new TextEditorView(mini: true)
       @editor = @editorView.getModel()
+      @historyTracker = new CommandHistory(@editor)
 
       @editorView.on 'keyup', (ev) ->
         {keyCode} = ev
-        if keyCode is 13
-          text = self.editor.getText()
-          self._changer.broadcast(text)
-          self.editor.setText('')
-          self
-            .debugger
-            .eval(text)
-            .then (result) ->
-              self._changer.broadcast(result.text)
-            .catch (e) ->
-              self._changer.broadcast(e.message)
+        switch keyCode
+          when 13
+            text = self.editor.getText()
+            self._changer.broadcast(text)
+            self.editor.setText('')
+            self.historyTracker.saveIfNew(text)
+            self
+              .debugger
+              .eval(text)
+              .then (result) ->
+                self._changer.broadcast(result.text)
+              .catch (e) ->
+                if e.message?
+                  self._changer.broadcast(e.message)
+                else
+                  self._changer.broadcast(e)
+          when 38
+            self.historyTracker.moveUp()
+          when 40
+            self.historyTracker.moveDown()
 
       return @editorView.get(0)
 
