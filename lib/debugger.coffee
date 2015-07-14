@@ -1,4 +1,5 @@
 R = require 'ramda'
+path = require 'path'
 kill = require 'tree-kill'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
@@ -20,7 +21,6 @@ class ProcessManager extends EventEmitter
         nodePath = @atom.config.get('node-debugger.nodePath')
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
-        isCoffee = @atom.config.get('node-debugger.isCoffeeScript')
 
         appPath = @atom
           .workspace
@@ -33,19 +33,11 @@ class ProcessManager extends EventEmitter
           appArgs or ''
         ]
 
-        # for coffee-script debugging
-        if isCoffee
-          args = [
-            '--nodejs'
-            "--debug-brk=#{port}"
-            file or appPath
-            appArgs or ''
-          ]
-
         logger.error 'spawn', dropEmpty(args)
 
         @process = childprocess.spawn nodePath, dropEmpty(args), {
           detached: true
+          cwd: path.dirname(args[1])
         }
 
         @process.stdout.on 'data', (d) ->
