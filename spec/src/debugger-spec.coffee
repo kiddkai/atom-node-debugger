@@ -1,13 +1,13 @@
-childprocess = require 'child_process'
+childprocess = require 'child-process-promise'
 {EventEmitter} = require 'events'
 {ProcessManager} = require '../../lib/debugger'
 Stream = require 'stream'
+Q = require('q')
 
 makeFakeProcess = () ->
   process = new EventEmitter()
   process.stdout = new Stream()
   process.stderr = new Stream()
-
   return process
 
 describe 'ProcessManager', ->
@@ -27,7 +27,7 @@ describe 'ProcessManager', ->
         config:
           get: (key) -> mapping[key]
 
-      spyOn(childprocess, 'spawn').andReturn(makeFakeProcess())
+      spyOn(childprocess, 'spawn').andReturn(Q.fcall(makeFakeProcess))
 
       manager = new ProcessManager(atomStub)
       waitsForPromise () ->

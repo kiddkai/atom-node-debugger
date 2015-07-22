@@ -1,9 +1,9 @@
 R = require 'ramda'
 path = require 'path'
+childprocess = require('child-process-promise');
 kill = require 'tree-kill'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
-childprocess = require 'child_process'
 {EventEmitter} = require 'events'
 Event = require 'geval/event'
 logger = require './logger'
@@ -15,58 +15,64 @@ class ProcessManager extends EventEmitter
     super()
     @process = null
 
-  start: (file) ->
-    @cleanup()
+  setup_loggers: ->
+    return unless @process
+    @process.stdout.on 'data', (d) ->
+      logger.info 'child_process', d.toString()
+    @process.stderr.on 'data', (d) ->
+      logger.info 'child_process', d.toString()
+    @process.stdout.on 'end', () ->
+      logger.info 'child_process', 'end out'
+    @process.stderr.on 'end', () ->
+      logger.info 'child_process', 'end error'
+    @process.once 'error', (e) =>
+      logger.error 'child_process error', e
+    @process.once 'close', () =>
+      logger.info 'child_process', 'close'
+    @process.once 'disconnect', () =>
+      logger.info 'child_process', 'disconnect'
+
+  spawn_process: ->
+    nodePath = @atom.config.get('node-debugger.nodePath')
+    appArgs = @atom.config.get('node-debugger.appArgs')
+    port = @atom.config.get('node-debugger.debugPort')
+    appPath = @atom.workspace.getActiveTextEditor().getPath()
+    args = [
+      "--debug-brk=#{port}"
+      appPath
+      appArgs or ''
+    ]
+    logger.info 'child_process', "spawn nodePath=#{nodePath}, args=#{dropEmpty(args)}, cwd=#{path.dirname(args[1])}"
+    return childprocess.spawn(nodePath, dropEmpty(args), {
+      detached: true
+      cwd: path.dirname(args[1])
+    })
+
+  start: ->
+    @spawn_process()
+      .progress (@process) =>
+        @setup_loggers()
+        @emit 'processCreated', @process
       .then =>
-        nodePath = @atom.config.get('node-debugger.nodePath')
-        appArgs = @atom.config.get('node-debugger.appArgs')
-        port = @atom.config.get('node-debugger.debugPort')
-
-        appPath = @atom
-          .workspace
-          .getActiveTextEditor()
-          .getPath()
-
-        args = [
-          "--debug-brk=#{port}"
-          file or appPath
-          appArgs or ''
-        ]
-
-        logger.error 'spawn', dropEmpty(args)
-
-        @process = childprocess.spawn nodePath, dropEmpty(args), {
-          detached: true
-          cwd: path.dirname(args[1])
-        }
-
-        @process.stdout.on 'data', (d) ->
-          logger.info 'child_process', d.toString()
-
-        @process.stderr.on 'data', (d) ->
-          logger.info 'child_process', d.toString()
-
-        @process.stdout.on 'end', () ->
-          logger.info 'child_process', 'end out'
-
-        @process.stderr.on 'end', () ->
-          logger.info 'child_process', 'end error'
-
-        @emit 'procssCreated', @process
-
-        @process.once 'error', (e) =>
-          logger.error 'child_process error', e
-          @emit 'processEnd', e
-
-        @process.once 'close', () =>
-          logger.info 'child_process', 'close'
-          @emit 'processEnd', @process
-
-        @process.once 'disconnect', () =>
-          logger.info 'child_process', 'disconnect'
-          @emit 'processEnd', @process
-
-        return @process
+        logger.info 'child_process', 'process exited'
+        @emit 'processEnd', @process
+      .fail (err) =>
+        switch err.code
+          when 1
+            logger.info 'child_process', 'process was killed (expected)'
+          when "ENOENT"
+            logger.info 'child_process', 'ENOENT exit code. ' + err.message
+            atom.notifications.addError(
+              "Failed to start debugger.
+               Exit code was ENOENT which indicates that the node
+               executable could not be found.
+               Try specifying an explicit path in your atom config file
+               using the node-debugger.nodePath configuration setting."
+            )
+          else
+            logger.info 'child_process', "Unexpected exit code #{err.code}. #{err.message}"
+            atom.notifications.addError("Unexpected exit code #{err.code}. #{err.message}")
+        @emit 'processEnd', @process
 
   cleanup: ->
     self = this
@@ -102,7 +108,7 @@ class Debugger extends EventEmitter
     @onBreak = @onBreakEvent.listen
     @onAddBreakpoint = @onAddBreakpointEvent.listen
     @onRemoveBreakpoint = @onRemoveBreakpointEvent.listen
-    @processManager.on 'procssCreated', @start
+    @processManager.on 'processCreated', @start
     @processManager.on 'processEnd', @cleanup
     @markers = []
 
