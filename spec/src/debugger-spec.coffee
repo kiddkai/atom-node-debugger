@@ -1,4 +1,3 @@
-#childprocess = require 'child_process'
 childprocess = require 'child-process-promise'
 {EventEmitter} = require 'events'
 {ProcessManager} = require '../../lib/debugger'

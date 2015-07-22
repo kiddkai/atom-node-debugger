@@ -1,6 +1,6 @@
 R = require 'ramda'
 path = require 'path'
-spawn = require('child-process-promise').spawn;
+childprocess = require('child-process-promise');
 kill = require 'tree-kill'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
@@ -43,7 +43,7 @@ class ProcessManager extends EventEmitter
       appArgs or ''
     ]
     logger.info 'child_process', "spawn nodePath=#{nodePath}, args=#{dropEmpty(args)}, cwd=#{path.dirname(args[1])}"
-    return spawn(nodePath, dropEmpty(args), {
+    return childprocess.spawn(nodePath, dropEmpty(args), {
       detached: true
       cwd: path.dirname(args[1])
     })
