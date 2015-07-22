@@ -72,7 +72,7 @@ class ProcessManager extends EventEmitter
           else
             logger.info 'child_process', "Unexpected exit code #{err.code}. #{err.message}"
             atom.notifications.addError("Unexpected exit code #{err.code}. #{err.message}")
-        @emit 'processEnd', self.process
+        @emit 'processEnd', @process
 
   cleanup: ->
     self = this
