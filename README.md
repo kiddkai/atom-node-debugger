@@ -5,7 +5,6 @@ node-debugger package
 
 ## Usage
 
-Check in the node-debugger package settings that the node path is set correctly.
 Open a javascript (.js) file and execute the start-resume command (F5) to launch the debugger.
 
 Debug panels will show up as shown in the image below.
@@ -45,6 +44,10 @@ The following attributes can be set to control the node-debugger.
   appArgs: ""
   debugPort: 5860
 ```
+
+## Troubleshooting
+
+Check in the node-debugger package settings that the node path is set correctly.
 
 ## Feedback
 

@@ -54,9 +54,20 @@ class ProcessManager extends EventEmitter
 
         @emit 'procssCreated', @process
 
-        @process.once 'error', (e) =>
-          logger.error 'child_process error', e
-          @emit 'processEnd', e
+        @process.once 'error', (err) =>
+          switch err.code
+            when "ENOENT"
+              logger.error 'child_process', "ENOENT exit code. Message: #{err.message}"
+              atom.notifications.addError(
+                "Failed to start debugger.
+                Exit code was ENOENT which indicates that the node
+                executable could not be found.
+                Try specifying an explicit path in your atom config file
+                using the node-debugger.nodePath configuration setting."
+              )
+            else
+              logger.error 'child_process', "Exit code #{err.code}. #{err.message}"
+          @emit 'processEnd', err
 
         @process.once 'close', () =>
           logger.info 'child_process', 'close'
