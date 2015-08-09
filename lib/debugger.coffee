@@ -19,6 +19,7 @@ class ProcessManager extends EventEmitter
     @cleanup()
       .then =>
         nodePath = @atom.config.get('node-debugger.nodePath')
+        nodeArgs = @atom.config.get('node-debugger.nodeArgs')
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
 
@@ -28,6 +29,7 @@ class ProcessManager extends EventEmitter
           .getPath()
 
         args = [
+          nodeArgs or ''
           "--debug-brk=#{port}"
           file or appPath
           appArgs or ''
