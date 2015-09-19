@@ -1,5 +1,6 @@
 R = require 'ramda'
-psTree = require 'ps-tree'
+path = require 'path'
+kill = require 'tree-kill'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
 childprocess = require 'child_process'
@@ -18,9 +19,9 @@ class ProcessManager extends EventEmitter
     @cleanup()
       .then =>
         nodePath = @atom.config.get('node-debugger.nodePath')
+        nodeArgs = @atom.config.get('node-debugger.nodeArgs')
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
-        isCoffee = @atom.config.get('node-debugger.isCoffeeScript')
 
         appPath = @atom
           .workspace
@@ -28,24 +29,17 @@ class ProcessManager extends EventEmitter
           .getPath()
 
         args = [
+          nodeArgs or ''
           "--debug-brk=#{port}"
           file or appPath
           appArgs or ''
         ]
 
-        # for coffee-script debugging
-        if isCoffee
-          args = [
-            '--nodejs'
-            "--debug-brk=#{port}"
-            file or appPath
-            appArgs or ''
-          ]
-
         logger.error 'spawn', dropEmpty(args)
 
         @process = childprocess.spawn nodePath, dropEmpty(args), {
           detached: true
+          cwd: path.dirname(args[1])
         }
 
         @process.stdout.on 'data', (d) ->
@@ -62,9 +56,20 @@ class ProcessManager extends EventEmitter
 
         @emit 'procssCreated', @process
 
-        @process.once 'error', (e) =>
-          logger.error 'child_process error', e
-          @emit 'processEnd', e
+        @process.once 'error', (err) =>
+          switch err.code
+            when "ENOENT"
+              logger.error 'child_process', "ENOENT exit code. Message: #{err.message}"
+              atom.notifications.addError(
+                "Failed to start debugger.
+                Exit code was ENOENT which indicates that the node
+                executable could not be found.
+                Try specifying an explicit path in your atom config file
+                using the node-debugger.nodePath configuration setting."
+              )
+            else
+              logger.error 'child_process', "Exit code #{err.code}. #{err.message}"
+          @emit 'processEnd', err
 
         @process.once 'close', () =>
           logger.info 'child_process', 'close'
@@ -81,7 +86,7 @@ class ProcessManager extends EventEmitter
     new Promise (resolve, reject) =>
       return resolve() if not @process?
       if @process.exitCode
-        logger.info 'child_process', 'process already exited with code ' + @process.exitcode
+        logger.info 'child_process', 'process already exited with code ' + @process.exitCode
         @process = null
         return resolve()
 
@@ -92,11 +97,7 @@ class ProcessManager extends EventEmitter
         resolve()
 
       logger.info 'child_process', 'start killing process'
-      psTree @process.pid, (err, children) =>
-        logger.info 'child_process_children', children
-        childprocess.spawn 'kill', ['-9'].concat(children.map((p) -> p.PID))
-        self.process.kill() if self.process?
-
+      kill @process.pid
 
       @process.once 'disconnect', onProcessEnd
       @process.once 'exit', onProcessEnd

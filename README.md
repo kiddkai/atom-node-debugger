@@ -37,13 +37,17 @@ The following attributes can be set to control the node-debugger.
 * nodePath - path to node.js executable
 * appArgs - arguments sent to the application during launch
 * debugPort - the port used to communicate to the launched process
- 
+
 ```js
-"atom-node-debugger":
+"node-debugger":
   nodePath: "C:/program/nodejs/node.exe"
   appArgs: ""
   debugPort: 5860
 ```
+
+## Troubleshooting
+
+Check in the node-debugger package settings that the node path is set correctly.
 
 ## Feedback
 
