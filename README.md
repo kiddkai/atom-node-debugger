@@ -45,6 +45,21 @@ The following attributes can be set to control the node-debugger.
   debugPort: 5860
 ```
 
+### Project
+
+Put a file named *node-debug.json* in your root project, and it will be automatically used.
+Here an example of content:
+
+```json
+{
+  "env": {
+    "NODE_ENV": "true"
+  },
+  "cwd": ".",
+  "main": "lib"
+}
+```
+
 ## Troubleshooting
 
 Check in the node-debugger package settings that the node path is set correctly.
