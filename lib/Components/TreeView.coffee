@@ -2,7 +2,7 @@ hg = require 'mercury'
 {h} = hg
 Promise = require 'bluebird'
 
-log = (msg) -> #console.log(msg)
+log = (msg) -> console.log(msg)
 
 TreeView = (title, loadChildren, { handlers, data, isRoot } = {}) ->
   log "TreeView constructor. title=#{title}, isRoot=#{isRoot}"
@@ -76,13 +76,18 @@ TreeView.defaultRender = (state) ->
     ]) if state.isRoot
   return result
 
-TreeViewItem = (value) -> hg.state({
+TreeViewItem = (value, { handlers, data } = {}) -> hg.state({
     render: { func: TreeViewItem.render }
     value: hg.value(value)
+    data: data
+    channels: {
+      click:
+        (state) -> handlers?.click?(state.data)
+    }
   })
 
 TreeViewItem.render = (state) ->
-  h('li.list-item.entry', {}, [state.value])
+  h('li.list-item.entry', { 'ev-click': hg.send state.channels.click }, [state.value])
 
 exports.TreeView = TreeView
 exports.TreeViewItem = TreeViewItem
