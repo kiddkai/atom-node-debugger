@@ -3,7 +3,7 @@ h = hg.h
 
 stepButton = require './StepButton'
 breakpointPanel = require './BreakPointPane'
-callstackPane = require './CallStackPane'
+callstackPane = require './CallStackPane2'
 consolePane = require './ConsolePane'
 cancelButton = require './CancelButton'
 dragHandler = require './drag-handler'
