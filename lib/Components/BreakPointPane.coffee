@@ -43,7 +43,7 @@ exports.create = (_debugger) ->
 
   BreakpointPanel = () ->
     state = builder.root()
-    refresh = () -> TreeView.reset(state)
+    refresh = () -> TreeView.populate(state)
     _debugger.onAddBreakpoint refresh
     _debugger.onRemoveBreakpoint refresh
     _debugger.onBreak refresh
