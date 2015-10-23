@@ -7,7 +7,6 @@ log = (msg) -> console.log(msg)
 TreeView = (title, loadChildren, { handlers, data, isRoot } = {}) ->
   log "TreeView constructor. title=#{title}, isRoot=#{isRoot}"
   return hg.state({
-      render: { func: TreeView.defaultRender }
       isRoot: hg.value(isRoot)
       title: hg.value(title)
       items: hg.array([])
@@ -18,37 +17,37 @@ TreeView = (title, loadChildren, { handlers, data, isRoot } = {}) ->
       channels: {
         click:
           (state) ->
-            TreeView.toggle(state, loadChildren)
+            TreeView.toggle(state)
             handlers?.click?(state.data)
-        reset: (state) -> TreeView.reset(state, loadChildren)
+      }
+      functors: {
+        render: TreeView.defaultRender
+        loadChildren: loadChildren
       }
     })
 
-TreeView.toggle = (state, loadChildren) ->
+TreeView.toggle = (state) ->
   log "TreeView.toggle #{state.isOpen()} item count=#{state.items().length} loaded=#{state.loaded()}, loading=#{state.loading()}"
   state.isOpen.set(!state.isOpen())
   return if state.loading() or state.loaded()
-  TreeView.populate(state, loadChildren)
+  TreeView.populate(state)
 
 TreeView.reset = (state) ->
   log "TreeView.reset"
   return unless state.loaded()
-  while(state.items().length)
-    state.items.pop()
-
+  state.items.set([])
   state.isOpen.set(false)
   state.loaded.set(false)
   state.loading.set(false)
   log "TreeView.reset: done"
 
-TreeView.populate = (state, loadChildren) ->
+TreeView.populate = (state) ->
   log "TreeView.populate"
   state.loading.set(true)
-  loadChildren()
+  state.functors.loadChildren()
   .then (children) ->
     log "TreeView.populate: children loaded. count=#{children.length})"
-    children.forEach (child) ->
-      state.items.push(child)
+    state.items.set(children)
   .then () ->
     log "TreeView.populate: all done"
     state.loaded.set(true)
@@ -59,7 +58,7 @@ TreeView.populate = (state, loadChildren) ->
     state.loading.set(false)
 
 TreeView.render = (state) ->
-  return state.render.func(state)
+  return state.functors.render(state)
 
 TreeView.defaultRender = (state) ->
   log "TreeView.render"
@@ -77,12 +76,14 @@ TreeView.defaultRender = (state) ->
   return result
 
 TreeViewItem = (value, { handlers, data } = {}) -> hg.state({
-    render: { func: TreeViewItem.render }
     value: hg.value(value)
     data: data
     channels: {
       click:
         (state) -> handlers?.click?(state.data)
+    }
+    functors: {
+      render: TreeViewItem.render
     }
   })
 
