@@ -40,7 +40,7 @@ exports.create = (_debugger) ->
 
   eventEmitter = new EventEmitter()
 
-  # helper: should be moved to debugger
+  # helper: move to debugger?
   builder =
     loadProperties: (ref) ->
       log "builder.loadProperties #{ref}"
@@ -57,7 +57,7 @@ exports.create = (_debugger) ->
             instance.properties[idx].value = value
           return instance.properties
 
-    # helper: should be moved to debugger
+    # helper: move to debugger?
     loadFrames: () ->
       log "builder.loadFrames"
       _debugger.fullTrace()
