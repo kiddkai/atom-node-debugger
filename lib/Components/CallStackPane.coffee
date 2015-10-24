@@ -40,8 +40,8 @@ exports.create = (_debugger) ->
 
   eventEmitter = new EventEmitter()
 
-  # helper: move to debugger?
   builder =
+    # helper: move to debugger?
     loadProperties: (ref) ->
       log "builder.loadProperties #{ref}"
       _debugger
