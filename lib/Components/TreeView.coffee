@@ -2,7 +2,7 @@ hg = require 'mercury'
 {h} = hg
 Promise = require 'bluebird'
 
-log = (msg) -> console.log(msg)
+log = (msg) -> #console.log(msg)
 
 TreeView = (title, loadChildren, { handlers, data, isRoot } = {}) ->
   log "TreeView constructor. title=#{title}, isRoot=#{isRoot}"
