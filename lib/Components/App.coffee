@@ -3,7 +3,7 @@ h = hg.h
 
 stepButton = require './StepButton'
 breakpointPanel = require './BreakPointPane'
-callstackPane = require './CallStackPane'
+callstackPaneModule = require './CallStackPane'
 consolePane = require './ConsolePane'
 cancelButton = require './CancelButton'
 dragHandler = require './drag-handler'
@@ -23,7 +23,7 @@ LeftSidePane = (ConsolePane, state) ->
     ConsolePane.render(state.logger)
   ])
 
-RightSidePane = (BreakPointPane, CallStackPane, StepButton, state) ->
+RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, StepButton, state) ->
   h('div', {
     style: {
       display: 'flex'
@@ -67,6 +67,7 @@ RightSidePane = (BreakPointPane, CallStackPane, StepButton, state) ->
       }, [
         BreakPointPane.render(state.breakpoints)
         CallStackPane.render(state.callstack)
+        LocalsPane.render(state.locals)
       ])
     ])
   ])
@@ -75,7 +76,7 @@ RightSidePane = (BreakPointPane, CallStackPane, StepButton, state) ->
 exports.start = (root, _debugger) ->
   StepButton = stepButton.StepButton(_debugger)
   BreakPointPane = breakpointPanel.create(_debugger)
-  CallStackPane = callstackPane.create(_debugger)
+  {CallStackPane, LocalsPane} = callstackPaneModule.create(_debugger)
   ConsolePane = consolePane.create(_debugger)
 
   changeHeight = (state, data) ->
@@ -105,6 +106,7 @@ exports.start = (root, _debugger) ->
       }
       breakpoints: BreakPointPane()
       callstack: CallStackPane()
+      locals: LocalsPane()
       logger: ConsolePane()
       cancel: cancelButton.create(_debugger)
     }
@@ -139,7 +141,7 @@ exports.start = (root, _debugger) ->
         }
       }, [
         LeftSidePane(ConsolePane, state)
-        RightSidePane(BreakPointPane, CallStackPane, StepButton, state)
+        RightSidePane(BreakPointPane, CallStackPane, LocalsPane, StepButton, state)
       ])
     ])
 
@@ -147,4 +149,4 @@ exports.start = (root, _debugger) ->
 
 exports.stop = ->
   BreakPointPane.cleanup() if BreakPointPane
-  callstackPane.cleanup()
+  callstackPaneModule.cleanup()

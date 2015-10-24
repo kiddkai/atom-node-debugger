@@ -2,6 +2,7 @@ Promise = require 'bluebird'
 {TreeView, TreeViewItem} = require './TreeView'
 hg = require 'mercury'
 fs = require 'fs'
+{EventEmitter} = require 'events'
 
 
 #######################################
@@ -36,6 +37,8 @@ openScript = (scriptId, script, line) ->
         })
 
 exports.create = (_debugger) ->
+
+  eventEmitter = new EventEmitter()
 
   # helper: should be moved to debugger
   builder =
@@ -101,7 +104,9 @@ exports.create = (_debugger) ->
             ])
           ),
           handlers: {
-              click: () -> openScript(frame.script.id, frame.script.name, frame.line)
+              click: () ->
+                openScript(frame.script.id, frame.script.name, frame.line)
+                eventEmitter.emit('frame-selected', frame)
           }
         )
 
@@ -114,12 +119,42 @@ exports.create = (_debugger) ->
     removeBreakListener = _debugger.onBreak () ->
       log "Debugger.break"
       TreeView.reset(state)
+      eventEmitter.emit('frame-selected', null)
     return state
 
   CallStackPane.render = (state) ->
     TreeView.render(state)
 
-  return CallStackPane
+  builder2 =
+    selectedFrame: null
+
+    loadLocals: () ->
+      framePromise = if builder2.selectedFrame then Promise.resolve(builder2.selectedFrame)
+      else builder.loadFrames().then (frames) -> return frames[0]
+
+      framePromise
+      .then (frame) ->
+        return frame.arguments.concat(frame.locals)
+
+    root: () ->
+      TreeView("Locals", (() -> builder2.loadLocals().map(builder.value)), isRoot:true)
+
+  LocalsPane = () ->
+    state = builder2.root()
+    refresh = () -> TreeView.populate(state)
+    eventEmitter.on 'frame-selected', (frame) ->
+      log "Frame selected"
+      builder2.selectedFrame = frame
+      refresh()
+    return state
+
+  LocalsPane.render = (state) ->
+    TreeView.render(state)
+
+  return {
+    CallStackPane: CallStackPane
+    LocalsPane: LocalsPane
+  }
 
 exports.cleanup = () ->
   removeBreakListener() if removeBreakListener?
