@@ -48,6 +48,9 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, StepButton, state) -
       }
     }, [
       h('div.debugger-panel-heading', {
+        style: {
+          'flex-shrink': 0
+        }
       }, [
         h('div.btn-group', {}, [
           StepButton.render(state.steps.stepContinue)
@@ -60,8 +63,7 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, StepButton, state) -
       h('div.panel-body', {
         style: {
           flex: 'auto'
-          display: 'flex'
-          flexDirection: 'column'
+          display: 'list-item'
           overflow: 'auto';
         }
       }, [
