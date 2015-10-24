@@ -101,9 +101,14 @@ exports.create = (_debugger) ->
       }
     }, [
       h('div.debugger-panel-heading', {}, ['stdout/stderr'])
-      h('div.panel-body.padded', style: {
-        flex: '1'
-        overflow: 'auto'
+      h('div.panel-body.padded.native-key-bindings', {
+        attributes: {
+          tabindex: '-1'
+        }
+        style: {
+          flex: '1'
+          overflow: 'auto'
+        }
       }, state.lines.map(tokenizeLine))
       h('div.debugger-editor', style: {
         height: '33px'
