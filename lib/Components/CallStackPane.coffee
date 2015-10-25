@@ -1,224 +1,160 @@
-hg = require 'mercury'
 Promise = require 'bluebird'
-{h} = hg
+{TreeView, TreeViewItem} = require './TreeView'
+hg = require 'mercury'
 fs = require 'fs'
-ToggleTree = require './ToggleTree'
+{EventEmitter} = require 'events'
 
-PROTOCOL = 'atom-node-debugger://'
+
+#######################################
 
 removeBreakListener = null
 
-exists = (path) ->
-  new Promise (resolve) ->
-    fs.exists path, (isExisted) ->
-      resolve(isExisted)
+log = (msg) -> #console.log(msg)
+
+openScript = (scriptId, script, line) ->
+
+  PROTOCOL = 'atom-node-debugger://'
+  scriptExists = new Promise (resolve) ->
+    fs.exists script, (result) ->
+      resolve(result)
+
+  scriptExists
+    .then (exists) ->
+      if exists
+        atom.workspace.open(script, {
+          initialLine: line
+          initialColumn: 0
+          activatePane: true
+          searchAllPanes: true
+        })
+      else
+        return if not state.scriptId()?
+        atom.workspace.open("#{PROTOCOL}#{scriptId}", {
+          initialColumn: 0
+          initialLine: line
+          name: script
+          searchAllPanes: true
+        })
 
 exports.create = (_debugger) ->
 
-  CallStackPane = () ->
-    state = hg.state({
-      rootToggle: ToggleTree.state('Call Stack')
-      frames: hg.array([])
-    })
+  eventEmitter = new EventEmitter()
 
-    removeBreakListener = _debugger.onBreak () ->
-      _debugger.fullTrace().then (traces) ->
-        while(state.frames().length)
-          state.frames.pop()
+  builder =
+    # helper: move to debugger?
+    loadProperties: (ref) ->
+      log "builder.loadProperties #{ref}"
+      _debugger
+      .lookup(ref)
+      .then (instance) ->
+        log "builder.loadProperties: instance loaded"
+        Promise
+        .map instance.properties, (prop) ->
+          _debugger.lookup(prop.ref)
+        .then (values) ->
+          log "builder.loadProperties: property values loaded"
+          values.forEach (value, idx) ->
+            instance.properties[idx].value = value
+          return instance.properties
 
-        traces.frames.forEach (frame, idx) ->
-          frame = Frame(frame)
-          state.frames.push(frame)
+    # helper: move to debugger?
+    loadFrames: () ->
+      log "builder.loadFrames"
+      _debugger.fullTrace()
+      .then (traces) ->
+        log "builder.loadFrames: frames loaded #{traces.frames.length}"
+        return traces.frames
 
-    return state
+    property: (property) ->
+      log "builder.property"
+      builder.value({
+        name: property.name
+        value: {
+          ref: property.ref
+          type: property.value.type
+          className: property.value.className
+          value: property.value.value
+        }
+      })
 
-  directValueView = (item) ->
-    h('li.list-item', {}, [item.vname + ": " + item.value.value])
+    value: (value) ->
+      log "builder.value"
+      name = value.name
+      type = value.value.type
+      className = value.value.className
+      switch(type)
+        when 'string', 'boolean', 'number', 'undefined', 'null'
+          value = value.value.value
+          TreeViewItem("#{name} : #{value}")
+        when 'function'
+          TreeViewItem("#{name} : function() { ... }")
+        when 'object'
+          decorate = (title) -> (state) -> if state.isOpen then title else "#{title} { ... }"
+          ref = value.value.ref
+          TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)))
 
-  undefinedValueView = (value) ->
-    h('li.list-item', {}, [String(value.vname) + ": undefined"])
-
-  ObjectValue = (value) ->
-    state = hg.state({
-      isOpen: hg.value(false)
-      vname: hg.value(value.name)
-      type: hg.value(value.value.type)
-      loading: hg.value(false)
-      loaded: hg.value(false)
-      className: hg.value(value.value.className)
-      ref: hg.value(value.value.ref)
-      properties: hg.array([])
-      channels: {
-        toggle: ObjectValue.toggleOnOff
-      }
-    })
-
-    return state
-
-  ObjectValue.toggleOnOff = (state) ->
-    isOpen = state.isOpen()
-    loading = state.loading()
-    loaded = state.loaded()
-    state.isOpen.set(!isOpen)
-
-    return if loading
-    return if loaded
-
-    state.loading.set(true)
-    _debugger
-    .lookup(state.ref())
-    .then (detail) ->
-      Promise
-      .map detail.properties, (prop) ->
-        _debugger.lookup(prop.ref)
-      .then (values) ->
-        values.forEach (value, idx) ->
-          detail.properties[idx].value = value
-        return detail
-    .then (detail) ->
-      state.loaded.set(true)
-      state.loading.set(false)
-      detail.properties.forEach (prop) ->
-        state.properties.push(Value({
-          name: prop.name
-          value: {
-            ref: prop.ref
-            type: prop.value.type
-            className: prop.value.className
-            value: prop.value.value
+    frame: (frame) ->
+      log "builder.frame #{frame.script.name}, #{frame.script.line}"
+      return TreeView(
+          "#{frame.script.name}:#{frame.line + 1}",
+          (() =>
+            Promise.resolve([
+              TreeView("arguments", (() => Promise.resolve(frame.arguments).map(builder.value)))
+              TreeView("variables", (() => Promise.resolve(frame.locals).map(builder.value)))
+            ])
+          ),
+          handlers: {
+              click: () ->
+                openScript(frame.script.id, frame.script.name, frame.line)
+                eventEmitter.emit('frame-selected', frame)
           }
-        }))
+        )
 
-    .catch (e) ->
-      state.loaded.set(false)
-      state.loading.set(false)
+    root: () ->
+      log "builder.root"
+      TreeView("Call stack", (() -> builder.loadFrames().map(builder.frame)), isRoot: true)
 
-
-  ObjectValue.render = (object) ->
-    if object.isOpen
-      content = "#{object.vname}: #{object.className}"
-    else
-      content = "#{object.vname} : #{object.className} { ... }"
-
-    h('li.list-nested-item', {
-      className: if object.isOpen then '' else 'collapsed'
-    }, [
-      h('div.list-item', {
-        'ev-click': hg.send object.channels.toggle
-      }, [content])
-      h('ul.list-tree.object', {}, object.properties.map(Value.render))
-    ])
-
-  Value = (value) ->
-    v = value.value
-    return ObjectValue(value) if v.type is 'object'
-
-    hg.state({
-      vname: hg.value(value.name)
-      type: hg.value(v.type)
-      value: hg.value(value.value)
-    })
-
-  Value.render = (value) ->
-    type = value.type
-    return directValueView(value) if type is 'string'
-    return directValueView(value) if type is 'boolean'
-    return directValueView(value) if type is 'number'
-    return directValueView(value) if type is 'undefined'
-    return directValueView(value) if type is 'null'
-    return ObjectValue.render(value) if type is 'object'
-    return functionValueView(value) if type is 'function'
-    return h('div', {}, ['unknown'])
-
-  functionValueView = (value) ->
-    h('li.list-item', {}, [String(value.vname) + ": function() { ... }"])
-
-  Frame = (frame) ->
-    hg.state({
-      script: hg.value(frame.script.name)
-      scriptId: hg.value(frame.script.id)
-      line: hg.value(frame.line)
-      arguments: hg.array(frame.arguments.map(Value))
-      argumentsOn: hg.value(false)
-      locals: hg.array(frame.locals.map(Value))
-      localsOn: hg.value(false)
-      isOpen: hg.value(false)
-      channels: {
-        toggle: Frame.toggleOnOff
-        argumentToggle: Frame.onOff('argumentsOn')
-        localsToggle: Frame.onOff('localsOn')
-      }
-    })
-
-  Frame.onOff = (type) -> (state) ->
-    state[type].set(!state[type]())
-
-  Frame.toggleOnOff = (state) ->
-    isOpen = state.isOpen()
-    state.isOpen.set(!isOpen)
-
-    exists(state.script())
-      .then (isExisted)->
-        if isExisted
-          promise = atom.workspace.open(state.script(), {
-            initialLine: state.line()
-            initialColumn: 0
-            activatePane: true
-            searchAllPanes: true
-          })
-        else
-          return if not state.scriptId()?
-          newSourceName = "#{PROTOCOL}#{state.scriptId()}"
-          promise = atom.workspace.open(newSourceName, {
-            initialColumn: 0
-            initialLine: state.line()
-            name: state.script()
-            searchAllPanes: true
-          })
-
-  Frame.render = (frame) ->
-    h('ul.list-tree', {}, [
-      h('li.list-nested-item', {
-        className: if frame.isOpen then '' else 'collapsed'
-      }, [
-        h('div.list-item', {
-          'ev-click': hg.send frame.channels.toggle
-        }, [
-          "#{frame.script}:#{frame.line + 1}"
-        ])
-        h('ul.list-tree', {}, [
-          h('li.list-nested-item', {
-            className: if frame.argumentsOn then '' else 'collapsed'
-          }, [
-              h('div.list-item', {
-                'ev-click': hg.send frame.channels.argumentToggle
-              }, [
-                'arguments'
-              ])
-              h('ul.list-tree.arguments', {}, frame.arguments.map(Value.render))
-          ])
-        ])
-        h('ul.list-tree', {}, [
-          h('li.list-nested-item', {
-            className: if frame.localsOn then '' else 'collapsed'
-          }, [
-              h('div.list-item', {
-                'ev-click': hg.send frame.channels.localsToggle
-              }, [
-                'variables'
-              ])
-              h('ul.list-tree.locals', {}, frame.locals.map(Value.render))
-          ])
-        ])
-      ])
-    ])
+  CallStackPane = () ->
+    state = builder.root()
+    removeBreakListener = _debugger.onBreak () ->
+      log "Debugger.break"
+      TreeView.reset(state)
+      eventEmitter.emit('frame-selected', null)
+    return state
 
   CallStackPane.render = (state) ->
-    frames = state.frames
+    TreeView.render(state)
 
-    ToggleTree.render(state.rootToggle, frames.map(Frame.render))
+  builder2 =
+    selectedFrame: null
 
-  return CallStackPane
+    loadLocals: () ->
+      framePromise = if builder2.selectedFrame then Promise.resolve(builder2.selectedFrame)
+      else builder.loadFrames().then (frames) -> return frames[0]
+
+      framePromise
+      .then (frame) ->
+        return frame.arguments.concat(frame.locals)
+
+    root: () ->
+      TreeView("Locals", (() -> builder2.loadLocals().map(builder.value)), isRoot:true)
+
+  LocalsPane = () ->
+    state = builder2.root()
+    refresh = () -> TreeView.populate(state)
+    eventEmitter.on 'frame-selected', (frame) ->
+      log "Frame selected"
+      builder2.selectedFrame = frame
+      refresh()
+    return state
+
+  LocalsPane.render = (state) ->
+    TreeView.render(state)
+
+  return {
+    CallStackPane: CallStackPane
+    LocalsPane: LocalsPane
+  }
 
 exports.cleanup = () ->
   removeBreakListener() if removeBreakListener?
