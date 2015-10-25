@@ -64,6 +64,9 @@ exports.create = (_debugger) ->
   ConsolePane = () ->
     state = hg.state({
       lines: hg.array([])
+      channels: {
+        clear: (state) -> state.lines.set([])
+      }
     })
 
     input.onEvalOrResult (text) ->
@@ -100,7 +103,22 @@ exports.create = (_debugger) ->
         flexDirection: 'column'
       }
     }, [
-      h('div.debugger-panel-heading', {}, ['stdout/stderr'])
+      h('div.debugger-panel-heading', {
+          style: {
+            display: 'flex'
+            flexDirection: 'row'
+            'align-items': 'center'
+            'justify-content': 'center'
+          }
+        }
+        [
+          h('div', {}, 'stdout/stderr')
+          h('div', {
+            style: { 'margin-left': 'auto' },
+            className: 'icon-trashcan btn btn-primary'
+            'ev-click': hg.send state.channels.clear
+          })
+        ])
       h('div.panel-body.padded.native-key-bindings', {
         attributes: {
           tabindex: '-1'
