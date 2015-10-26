@@ -9,11 +9,12 @@ handleDrag = (ev, broadcast) ->
   onmove = (ev) ->
     docHeight = $(document).height()
     docWidth = $(document).width()
-
     {pageY, pageX} = ev
-
+    statusBarHeight = $('div.status-bar-left').height()
+    statusBarHeight = 0 unless statusBarHeight?
+    
     delta = {
-      height: docHeight - pageY
+      height: docHeight - pageY - statusBarHeight
       sideWidth: docWidth - pageX
     }
 
