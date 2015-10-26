@@ -1,6 +1,7 @@
 R = require 'ramda'
 path = require 'path'
 kill = require 'tree-kill'
+fs = require 'fs'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
 childprocess = require 'child_process'
@@ -15,32 +16,73 @@ class ProcessManager extends EventEmitter
     super()
     @process = null
 
+  loadNodeDebug: (file, args, port, appArgs) ->
+    self = this
+    new Promise (resolve, reject) =>
+      logger.error 'spawn', dropEmpty(args)
+
+      entryPoint    = dropEmpty(args)
+      currentPath   = path.dirname(entryPoint[1]);
+      debugFileName = 'node-debug.json';
+      maxRange      = 5;
+      infos         = {
+        detached: true
+        cwd: currentPath
+      }
+
+      findFile = (range) ->
+        debugFile = path.resolve(currentPath, debugFileName);
+
+        fs.stat debugFile, (err, result) ->
+          if err and range < maxRange
+            currentPath = path.join(currentPath, '..');
+
+            findFile(range + 1)
+          else if range >= maxRange
+            resolve(entryPoint, infos)
+          else
+            projectInfos = require(debugFile);
+
+            if (projectInfos.detached isnt null)
+              infos.detached = projectInfos.detached
+
+            if (projectInfos.env isnt null)
+              infos.env = projectInfos.env
+
+            if (projectInfos.main isnt null)
+              main = path.resolve(path.dirname(debugFile), projectInfos.main)
+              entryPoint = [
+                "--debug-brk=#{port}"
+                main
+                appArgs or ''
+              ]
+              infos.cwd  = path.dirname(main)
+
+            resolve entryPoint, infos
+
+      findFile 0
+
   start: (file) ->
+    self = this
+    nodePath = @atom.config.get('node-debugger.nodePath')
+    appArgs = @atom.config.get('node-debugger.appArgs')
+    port = @atom.config.get('node-debugger.debugPort')
+
+    appPath = @atom
+      .workspace
+      .getActiveTextEditor()
+      .getPath()
+
+    args = [
+      "--debug-brk=#{port}"
+      file or appPath
+      appArgs or ''
+    ]
+
     @cleanup()
-      .then =>
-        nodePath = @atom.config.get('node-debugger.nodePath')
-        nodeArgs = @atom.config.get('node-debugger.nodeArgs')
-        appArgs = @atom.config.get('node-debugger.appArgs')
-        port = @atom.config.get('node-debugger.debugPort')
-
-        appPath = @atom
-          .workspace
-          .getActiveTextEditor()
-          .getPath()
-
-        args = [
-          nodeArgs or ''
-          "--debug-brk=#{port}"
-          file or appPath
-          appArgs or ''
-        ]
-
-        logger.error 'spawn', dropEmpty(args)
-
-        @process = childprocess.spawn nodePath, dropEmpty(args), {
-          detached: true
-          cwd: path.dirname(args[1])
-        }
+      .then(@loadNodeDebug.bind(self, file, args, port, appArgs))
+      .then (entryPoint, infos) =>
+        @process = childprocess.spawn nodePath, entryPoint, infos
 
         @process.stdout.on 'data', (d) ->
           logger.info 'child_process', d.toString()
