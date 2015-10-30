@@ -35,14 +35,17 @@ You may access the commands using CMD/Ctrl+p or by using the shortcut key specif
 The following attributes can be set to control the node-debugger.
 
 * nodePath - path to node.js executable
+* nodeArgs - arguments sent to node.js during launch
 * appArgs - arguments sent to the application during launch
 * debugPort - the port used to communicate to the launched process
-
-```js
+* env - the process environment variables (if left empty the environment will be inherited)
+```CoffeeScript
 "node-debugger":
   nodePath: "C:/program/nodejs/node.exe"
-  appArgs: ""
+  nodeArgs: "--use-strict --use_inlining"
+  appArgs: "--arg1=10 --arg2"
   debugPort: 5860
+  env: "key1=value1;key2=value2;key3=value3"  
 ```
 
 ## Troubleshooting
