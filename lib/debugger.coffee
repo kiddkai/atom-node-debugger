@@ -35,16 +35,19 @@ class ProcessManager extends EventEmitter
           .getActiveTextEditor()
           .getPath()
 
+        dbgFile = file or appPath
+        cwd = path.dirname(dbgFile)
+
         args = []
         args = args.concat (nodeArgs.split(' ')) if nodeArgs
         args.push "--debug-brk=#{port}"
-        args.push file or appPath
+        args.push dbgFile
         args = args.concat (appArgs.split(' ')) if appArgs
 
         logger.error 'spawn', {args:args, env:env}
         @process = childprocess.spawn nodePath, args, {
           detached: true
-          cwd: path.dirname(args[1])
+          cwd: cwd
           env: env if env
         }
 
