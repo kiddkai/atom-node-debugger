@@ -8,12 +8,18 @@ childprocess = require 'child_process'
 Event = require 'geval/event'
 logger = require './logger'
 
-dropEmpty = R.reject(R.isEmpty)
-
 class ProcessManager extends EventEmitter
   constructor: (@atom = atom)->
     super()
     @process = null
+
+  parseEnv: (env) ->
+    return null unless env
+    key = (s) -> s.split("=")[0]
+    value = (s) -> s.split("=")[1]
+    result = {}
+    result[key(e)] = value(e) for e in env.split(";")
+    return result
 
   start: (file) ->
     @cleanup()
@@ -22,24 +28,27 @@ class ProcessManager extends EventEmitter
         nodeArgs = @atom.config.get('node-debugger.nodeArgs')
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
+        env = @parseEnv @atom.config.get('node-debugger.env')
 
         appPath = @atom
           .workspace
           .getActiveTextEditor()
           .getPath()
 
-        args = [
-          nodeArgs or ''
-          "--debug-brk=#{port}"
-          file or appPath
-          appArgs or ''
-        ]
+        dbgFile = file or appPath
+        cwd = path.dirname(dbgFile)
 
-        logger.error 'spawn', dropEmpty(args)
+        args = []
+        args = args.concat (nodeArgs.split(' ')) if nodeArgs
+        args.push "--debug-brk=#{port}"
+        args.push dbgFile
+        args = args.concat (appArgs.split(' ')) if appArgs
 
-        @process = childprocess.spawn nodePath, dropEmpty(args), {
+        logger.error 'spawn', {args:args, env:env}
+        @process = childprocess.spawn nodePath, args, {
           detached: true
-          cwd: path.dirname(args[1])
+          cwd: cwd
+          env: env if env
         }
 
         @process.stdout.on 'data', (d) ->

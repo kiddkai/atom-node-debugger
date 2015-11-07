@@ -40,6 +40,9 @@ module.exports =
     isCoffeeScript:
       type: 'boolean'
       default: false
+    env:
+      type: 'string'
+      default: ''
 
   activate: () ->
     @disposables = new CompositeDisposable()

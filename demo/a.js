@@ -1,6 +1,12 @@
 var b = require('./b')
   , result
 
+console.log("command line arguments:")
+console.log(JSON.stringify(process.argv.slice(2)))
+
+console.log("environment:")
+console.log(process.env.key1)
+
 var c = 100;
 var e = {
   foo: 'bar',
