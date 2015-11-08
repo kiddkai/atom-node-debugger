@@ -71,7 +71,7 @@ module.exports =
     editor = atom.workspace.getActiveTextEditor()
     path = editor.getPath()
     {row} = editor.getCursorBufferPosition()
-    _debugger.toggleBreakpoint(editor, path, row)
+    _debugger.breakpointManager.toggleBreakpoint editor, path, row
 
   stepNext: =>
     _debugger.step('next', 1)
