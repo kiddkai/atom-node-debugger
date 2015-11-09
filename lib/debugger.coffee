@@ -112,9 +112,8 @@ class ProcessManager extends EventEmitter
       @process.once 'exit', onProcessEnd
       @process.once 'close', onProcessEnd
 
-class BreakpointManager extends EventEmitter
+class BreakpointManager
   constructor: (@debugger) ->
-    super()
     log "BreakpointManager.constructor"
     self = this
     @breakpoints = []
@@ -287,13 +286,10 @@ class Debugger extends EventEmitter
     @client.once 'ready', @bindEvents
 
     @client.on 'unhandledResponse', (res) => @emit 'unhandledResponse', res
-    @client.on 'break', (res) =>
-      @onBreakEvent.broadcast(res.body)
-      @emit 'break', res.body
+    @client.on 'break', (res) => @onBreakEvent.broadcast(res.body); @emit 'break', res.body
     @client.on 'exception', (res) => @emit 'exception', res.body
     @client.on 'error', onConnectionError
-    @client.on 'close', () ->
-      logger.info 'client', 'client closed'
+    @client.on 'close', () -> logger.info 'client', 'client closed'
 
     attemptConnect()
 
