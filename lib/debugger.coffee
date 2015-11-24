@@ -4,11 +4,11 @@ kill = require 'tree-kill'
 Promise = require 'bluebird'
 {Client} = require '_debugger'
 childprocess = require 'child_process'
-{EventEmitter} = require 'events'
+{EventEmitter} = require './eventing'
 Event = require 'geval/event'
 logger = require './logger'
 
-log = (msg) -> #console.log(msg)
+log = (msg) -> # console.log(msg)
 
 class ProcessManager extends EventEmitter
   constructor: (@atom = atom)->
@@ -118,11 +118,11 @@ class BreakpointManager
     self = this
     @breakpoints = []
     @client = null
-    @debugger.on 'connected', ->
+    @removeOnConnected = @debugger.subscribe 'connected', ->
       self.client = self.debugger.client
       log "BreakpointManager.connected #{@client}"
       self.attachBreakpoint breakpoint for breakpoint in self.breakpoints
-    @debugger.on 'disconnected', ->
+    @removeOnDisconnected = @debugger.subscribe 'disconnected', ->
       log "BreakpointManager.disconnected"
       self.client = null
       for breakpoint in self.breakpoints
@@ -130,6 +130,12 @@ class BreakpointManager
         self.decorateBreakpoint breakpoint
     @onAddBreakpointEvent = Event()
     @onRemoveBreakpointEvent = Event()
+
+  dispose: () ->
+    @removeOnConnected() if @removeOnConnected
+    @removeOnConnected = null
+    @removeOnDisconnected() if @removeOnDisconnected
+    @removeOnDisconnected = null
 
   toggleBreakpoint: (editor, script, line) ->
     log "BreakpointManager.toggleBreakpoint #{script}, #{line}"
@@ -218,6 +224,10 @@ class Debugger extends EventEmitter
     @onRemoveBreakpoint = @breakpointManager.onRemoveBreakpointEvent.listen
     @processManager.on 'processCreated', @start
     @processManager.on 'processEnd', @cleanup
+
+  dispose: ->
+    @breakpointManager.dispose() if @breakpointManager
+    @breakpointManager = null
 
   stopRetrying: ->
     return unless @timeout?

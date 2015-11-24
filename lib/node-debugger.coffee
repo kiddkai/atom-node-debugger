@@ -1,5 +1,4 @@
 NodeDebuggerView = require './node-debugger-view'
-Event = require 'geval'
 {CompositeDisposable} = require 'atom'
 {Debugger, ProcessManager} = require './debugger'
 jumpToBreakpoint = require './jump-to-breakpoint'
@@ -9,13 +8,6 @@ os = require 'os'
 processManager = null
 _debugger = null
 onBreak = null
-
-initNotifications = (_debugger) ->
-  _debugger.on 'connected', ->
-    atom.notifications.addSuccess('connected, enjoy debugging : )')
-
-  _debugger.on 'disconnected', ->
-    atom.notifications.addInfo('finish debugging : )')
 
 module.exports =
   nodeDebuggerView: null
@@ -48,7 +40,10 @@ module.exports =
     @disposables = new CompositeDisposable()
     processManager = new ProcessManager(atom)
     _debugger = new Debugger(atom, processManager)
-    initNotifications(_debugger)
+    @disposables.add _debugger.subscribeDisposable 'connected', ->
+      atom.notifications.addSuccess('connected, enjoy debugging : )')
+    @disposables.add _debugger.subscribeDisposable 'disconnected', ->
+      atom.notifications.addInfo('finish debugging : )')
     @disposables.add atom.commands.add('atom-workspace', {
       'node-debugger:start-resume': @startOrResume
       'node-debugger:stop': @stop
@@ -74,13 +69,13 @@ module.exports =
     _debugger.breakpointManager.toggleBreakpoint editor, path, row
 
   stepNext: =>
-    _debugger.step('next', 1)
+    _debugger.step('next', 1) if _debugger.isConnected()
 
   stepIn: =>
-    _debugger.step('in', 1)
+    _debugger.step('in', 1) if _debugger.isConnected()
 
   stepOut: =>
-    _debugger.step('out', 1)
+    _debugger.step('out', 1) if _debugger.isConnected()
 
   stop: =>
     processManager.cleanup()
@@ -94,6 +89,8 @@ module.exports =
     @stop()
     @disposables.dispose()
     NodeDebuggerView.destroy()
+    @removeConnectedListener()
+    _debugger.dispose()
 
   serialize: ->
     nodeDebuggerViewState: @nodeDebuggerView.serialize()
