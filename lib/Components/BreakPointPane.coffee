@@ -6,11 +6,9 @@ log = (msg) -> #console.log(msg)
 
 {TreeView, TreeViewItem} = require './TreeView'
 
-gotoBreakpoint = (brk) ->
-  {line} = brk
-  {name} = brk.script
-  atom.workspace.open(name, {
-    initialLine: line
+gotoBreakpoint = (breakpoint) ->
+  atom.workspace.open(breakpoint.script, {
+    initialLine: breakpoint.line
     initialColumn: 0
     activatePane: true
     searchAllPanes: true
@@ -21,22 +19,11 @@ exports.create = (_debugger) ->
   builder =
     listBreakpoints: () ->
       log "builder.listBreakpoints"
-      _debugger.listBreakpoints()
-        .then (brks) ->
-          Promise.map brks, (brk) ->
-            log("processing breakpoint " + JSON.stringify(brk))
-            if brk.script_id?
-              return _debugger.getScriptById(brk.script_id)
-                .then (script) ->
-                  brk.script = script
-                  return brk
-            else if brk.script_name
-              brk.script = { name: brk.script_name }
-            return brk
+      Promise.resolve(_debugger.breakpointManager.breakpoints)
 
     breakpoint: (breakpoint) ->
       log "builder.breakpoint"
-      TreeViewItem("#{breakpoint.script.name} : (#{breakpoint.line + 1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
+      TreeViewItem("#{breakpoint.script} : (#{breakpoint.line+1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
 
     root: () ->
       TreeView("Breakpoints", (() -> builder.listBreakpoints().map(builder.breakpoint)), isRoot: true)

@@ -79,7 +79,7 @@ exports.create = (_debugger) ->
           next()
       })
 
-    _debugger.processManager.on 'procssCreated', ->
+    _debugger.processManager.on 'processCreated', ->
       {stdout, stderr} = _debugger.processManager.process
 
       stdout.on 'data', (d) -> console.log(d.toString())
