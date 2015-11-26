@@ -89,7 +89,6 @@ module.exports =
     @stop()
     @disposables.dispose()
     NodeDebuggerView.destroy()
-    @removeConnectedListener()
     _debugger.dispose()
 
   serialize: ->
