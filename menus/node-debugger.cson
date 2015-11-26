@@ -1,0 +1,34 @@
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'Node Debugger'
+      'submenu': [
+        {
+          'label': 'Start/Resume'
+          'command': 'node-debugger:start-resume'
+        },
+        {
+          'label': 'Stop'
+          'command': 'node-debugger:stop'
+        },
+        {
+          'label': 'Step In'
+          'command': 'node-debugger:step-in'
+        },
+        {
+          'label': 'Stop Out'
+          'command': 'node-debugger:step-out'
+        },
+        {
+          'label': 'Step Next'
+          'command': 'node-debugger:step-next'
+        },
+        {
+          'label': 'Toggle Breakpoint'
+          'command': 'node-debugger:toggle-breakpoint'
+        }
+      ]
+    ]
+  }
+]
