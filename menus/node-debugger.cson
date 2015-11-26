@@ -17,7 +17,7 @@
           'command': 'node-debugger:step-in'
         },
         {
-          'label': 'Stop Out'
+          'label': 'Step Out'
           'command': 'node-debugger:step-out'
         },
         {
