@@ -27,7 +27,7 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, StepButton, state) -
   h('div', {
     style: {
       display: 'flex'
-      witdh: "#{state.sideWidth}px"
+      width: "#{state.sideWidth}px"
       flexBasis: "#{state.sideWidth}px"
       height: "#{state.height}px"
       flexDirection: 'row'

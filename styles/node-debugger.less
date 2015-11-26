@@ -48,9 +48,12 @@ atom-text-editor::shadow {
         background-color: #FF850B;
       }
   }
+}
 
-  /* force width to zero to be able to resize to atom-text-editor element*/
-  /deep/ .scroll-view div.lines {
-      width:0px !important;
-  }
+/*
+hack: force width to zero to be able to resize to atom-text-editor element
+to solve resizing problem of console pane: https://github.com/kiddkai/atom-node-debugger/issues/109
+*/
+div.inset-panel atom-text-editor /deep/ .scroll-view div.lines {
+    width:0px !important;
 }
