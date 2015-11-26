@@ -58,7 +58,7 @@ TreeView.populate = (state) ->
     state.loading.set(false)
 
 TreeView.render = (state) ->
-  return state.functors.render(state)
+  return state?.functors?.render?(state)
 
 TreeView.defaultRender = (state) ->
   log "TreeView.render"
