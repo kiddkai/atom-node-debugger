@@ -133,6 +133,7 @@ exports.start = (root, _debugger) ->
         style:
           height: '5px'
           cursor: 'ns-resize'
+          flex: '0 0 auto' # avoid collapse of resizer (size it is an empty div it seems to easily collapse into nothing preveting the user to resize)
         'ev-mousedown': dragHandler state.channels.changeHeight, {}
       })
       h('div', {
