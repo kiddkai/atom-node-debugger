@@ -10,6 +10,7 @@ exports.create = (_debugger) ->
   jsGrammar = atom.grammars.grammarForScopeName('source.js')
 
   tokenizeLine = (text) ->
+    return h('div.line', {}, text) unless jsGrammar
     {tokens} = jsGrammar.tokenizeLine(text)
     h('div.line', {}, [
       h('span.test.shell-session', {}, tokens.map((token) ->
