@@ -23,7 +23,11 @@ class ProcessManager extends EventEmitter
     result[key(e)] = value(e) for e in env.split(";")
     return result
 
-  start: (file) ->
+  startActiveFile: () ->
+    @start true
+
+  start: (withActiveFile) ->
+    startActive = withActiveFile
     @cleanup()
       .then =>
         nodePath = @atom.config.get('node-debugger.nodePath')
@@ -31,11 +35,15 @@ class ProcessManager extends EventEmitter
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
         env = @parseEnv @atom.config.get('node-debugger.env')
+        defaultFile = @atom.project.getPaths()[0] + '/' + @atom.config.get('node-debugger.defaultFile')
 
-        editor = @atom.workspace.getActiveTextEditor()
-        appPath = editor.getPath()
+        dbgFile = defaultFile
 
-        dbgFile = file or appPath
+        if startActive == true
+          editor = @atom.workspace.getActiveTextEditor()
+          appPath = editor.getPath()
+          dbgFile = appPath
+
         cwd = path.dirname(dbgFile)
 
         args = []

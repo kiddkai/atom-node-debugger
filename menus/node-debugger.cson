@@ -9,6 +9,10 @@
           'command': 'node-debugger:start-resume'
         },
         {
+          'label': 'Debug Active File'
+          'command': 'node-debugger:start-active-file'
+        },
+        {
           'label': 'Stop'
           'command': 'node-debugger:stop'
         },
