@@ -30,16 +30,17 @@ class ProcessManager extends EventEmitter
     startActive = withActiveFile
     @cleanup()
       .then =>
+        packageJSON = require @atom.project.resolvePath('package.json')
         nodePath = @atom.config.get('node-debugger.nodePath')
         nodeArgs = @atom.config.get('node-debugger.nodeArgs')
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
         env = @parseEnv @atom.config.get('node-debugger.env')
-        scriptMain = @atom.project.getPaths()[0] + '/' + @atom.config.get('node-debugger.scriptMain')
+        scriptMain = @atom.project.resolvePath(@atom.config.get('node-debugger.scriptMain'))
 
-        dbgFile = scriptMain
+        dbgFile = scriptMain || packageJSON && @atom.project.resolvePath(packageJSON.main)
 
-        if startActive == true
+        if startActive == true || !dbgFile
           editor = @atom.workspace.getActiveTextEditor()
           appPath = editor.getPath()
           dbgFile = appPath
