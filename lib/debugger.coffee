@@ -35,9 +35,9 @@ class ProcessManager extends EventEmitter
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
         env = @parseEnv @atom.config.get('node-debugger.env')
-        defaultFile = @atom.project.getPaths()[0] + '/' + @atom.config.get('node-debugger.defaultFile')
+        scriptMain = @atom.project.getPaths()[0] + '/' + @atom.config.get('node-debugger.scriptMain')
 
-        dbgFile = defaultFile
+        dbgFile = scriptMain
 
         if startActive == true
           editor = @atom.workspace.getActiveTextEditor()

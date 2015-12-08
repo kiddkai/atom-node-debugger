@@ -26,9 +26,9 @@ module.exports =
     nodeArgs:
       type: 'string'
       default: ''
-    defaultFile:
+    scriptMain:
       type: 'string'
-      default: 'app.js'
+      default: ''
     appArgs:
       type: 'string'
       default: ''
@@ -68,7 +68,7 @@ module.exports =
 
   startActiveFile: =>
     if _debugger.isConnected()
-      _debugger.reqContinue()
+      return
     else
       processManager.startActiveFile()
       NodeDebuggerView.show(_debugger)
