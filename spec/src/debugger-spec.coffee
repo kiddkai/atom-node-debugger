@@ -22,7 +22,7 @@ describe 'ProcessManager', ->
 
       atomStub =
         project:
-          resolvePath: (file) -> '/path/to/' + file
+          resolvePath: (file) -> '/path/to/file.js'
         workspace:
           getActiveTextEditor: ->
             getPath: -> '/path/to/file.js'
