@@ -7,6 +7,7 @@ childprocess = require 'child_process'
 {EventEmitter} = require './eventing'
 Event = require 'geval/event'
 logger = require './logger'
+fs = require 'fs'
 
 log = (msg) -> # console.log(msg)
 
@@ -30,7 +31,8 @@ class ProcessManager extends EventEmitter
     startActive = withActiveFile
     @cleanup()
       .then =>
-        packageJSON = require @atom.project.resolvePath('package.json')
+        packagePath = @atom.project.resolvePath('package.json')
+        packageJSON = require packagePath if fs.existsSync(packagePath)
         nodePath = @atom.config.get('node-debugger.nodePath')
         nodeArgs = @atom.config.get('node-debugger.nodeArgs')
         appArgs = @atom.config.get('node-debugger.appArgs')
