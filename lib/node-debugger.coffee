@@ -26,6 +26,9 @@ module.exports =
     nodeArgs:
       type: 'string'
       default: ''
+    scriptMain:
+      type: 'string'
+      default: ''
     appArgs:
       type: 'string'
       default: ''
@@ -46,6 +49,7 @@ module.exports =
       atom.notifications.addInfo('finish debugging : )')
     @disposables.add atom.commands.add('atom-workspace', {
       'node-debugger:start-resume': @startOrResume
+      'node-debugger:start-active-file': @startActiveFile
       'node-debugger:stop': @stop
       'node-debugger:toggle-breakpoint': @toggleBreakpoint
       'node-debugger:step-next': @stepNext
@@ -60,6 +64,13 @@ module.exports =
       _debugger.reqContinue()
     else
       processManager.start()
+      NodeDebuggerView.show(_debugger)
+
+  startActiveFile: =>
+    if _debugger.isConnected()
+      return
+    else
+      processManager.startActiveFile()
       NodeDebuggerView.show(_debugger)
 
   toggleBreakpoint: =>

@@ -7,6 +7,7 @@ childprocess = require 'child_process'
 {EventEmitter} = require './eventing'
 Event = require 'geval/event'
 logger = require './logger'
+fs = require 'fs'
 
 log = (msg) -> # console.log(msg)
 
@@ -23,19 +24,29 @@ class ProcessManager extends EventEmitter
     result[key(e)] = value(e) for e in env.split(";")
     return result
 
-  start: (file) ->
+  startActiveFile: () ->
+    @start true
+
+  start: (withActiveFile) ->
+    startActive = withActiveFile
     @cleanup()
       .then =>
+        packagePath = @atom.project.resolvePath('package.json')
+        packageJSON = require packagePath if fs.existsSync(packagePath)
         nodePath = @atom.config.get('node-debugger.nodePath')
         nodeArgs = @atom.config.get('node-debugger.nodeArgs')
         appArgs = @atom.config.get('node-debugger.appArgs')
         port = @atom.config.get('node-debugger.debugPort')
         env = @parseEnv @atom.config.get('node-debugger.env')
+        scriptMain = @atom.project.resolvePath(@atom.config.get('node-debugger.scriptMain'))
 
-        editor = @atom.workspace.getActiveTextEditor()
-        appPath = editor.getPath()
+        dbgFile = scriptMain || packageJSON && @atom.project.resolvePath(packageJSON.main)
 
-        dbgFile = file or appPath
+        if startActive == true || !dbgFile
+          editor = @atom.workspace.getActiveTextEditor()
+          appPath = editor.getPath()
+          dbgFile = appPath
+
         cwd = path.dirname(dbgFile)
 
         args = []

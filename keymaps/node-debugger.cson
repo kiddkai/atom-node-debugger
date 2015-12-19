@@ -9,6 +9,7 @@
 # https://atom.io/docs/latest/advanced/keymaps
 'atom-workspace':
   'f5': 'node-debugger:start-resume'
+  'ctrl-f5': 'node-debugger:start-active-file'
   'shift-f5': 'node-debugger:stop'
   'f9': 'node-debugger:toggle-breakpoint'
   'f10': 'node-debugger:step-next'
