@@ -4,7 +4,7 @@ Promise = require 'bluebird'
 
 log = (msg) -> #console.log(msg)
 
-{TreeView, TreeViewItem} = require './TreeView'
+{TreeView, TreeViewItem, TreeViewUtils} = require './TreeView'
 
 gotoBreakpoint = (breakpoint) ->
   atom.workspace.open(breakpoint.script, {
@@ -23,8 +23,10 @@ exports.create = (_debugger) ->
 
     breakpoint: (breakpoint) ->
       log "builder.breakpoint"
-      TreeViewItem("#{breakpoint.script} : (#{breakpoint.line+1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
-
+      TreeViewItem(
+        TreeViewUtils.createFileRefHeader breakpoint.script, breakpoint.line+1
+        handlers: { click: () -> gotoBreakpoint(breakpoint) }
+      )
     root: () ->
       TreeView("Breakpoints", (() -> builder.listBreakpoints().map(builder.breakpoint)), isRoot: true)
 
