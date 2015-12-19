@@ -3,7 +3,7 @@ Promise = require 'bluebird'
 hg = require 'mercury'
 fs = require 'fs'
 {EventEmitter} = require 'events'
-
+{h} = hg
 
 #######################################
 
@@ -96,7 +96,13 @@ exports.create = (_debugger) ->
     frame: (frame) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
       return TreeView(
-          "#{frame.script.name}:#{frame.line + 1}",
+          ((state) -> h('div', {
+            title: frame.script.name
+            style:
+              display: 'inline'
+            },
+            ["#{atom.project.relativizePath(frame.script.name)[1]}:#{frame.line + 1}"]
+          ))
           (() =>
             Promise.resolve([
               TreeView("arguments", (() => Promise.resolve(frame.arguments).map(builder.value)))

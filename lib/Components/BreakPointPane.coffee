@@ -23,8 +23,16 @@ exports.create = (_debugger) ->
 
     breakpoint: (breakpoint) ->
       log "builder.breakpoint"
-      TreeViewItem("#{breakpoint.script} : (#{breakpoint.line+1})", handlers: { click: () -> gotoBreakpoint(breakpoint) })
-
+      TreeViewItem(
+        ((state) -> h("div", {
+            title: breakpoint.script
+            style:
+              display: 'inline'
+          }
+          ["#{atom.project.relativizePath(breakpoint.script)[1]} : (#{breakpoint.line+1})"]
+        )),
+        handlers: { click: () -> gotoBreakpoint(breakpoint) }
+      )
     root: () ->
       TreeView("Breakpoints", (() -> builder.listBreakpoints().map(builder.breakpoint)), isRoot: true)
 

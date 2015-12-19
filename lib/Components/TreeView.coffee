@@ -88,7 +88,7 @@ TreeViewItem = (value, { handlers, data } = {}) -> hg.state({
   })
 
 TreeViewItem.render = (state) ->
-  h('li.list-item.entry', { 'ev-click': hg.send state.channels.click }, [state.value])
+  h('li.list-item.entry', { 'ev-click': hg.send state.channels.click }, [state.value?(state) ? state.value])
 
 exports.TreeView = TreeView
 exports.TreeViewItem = TreeViewItem
