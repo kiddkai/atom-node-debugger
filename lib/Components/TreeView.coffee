@@ -90,5 +90,16 @@ TreeViewItem = (value, { handlers, data } = {}) -> hg.state({
 TreeViewItem.render = (state) ->
   h('li.list-item.entry', { 'ev-click': hg.send state.channels.click }, [state.value?(state) ? state.value])
 
+class TreeViewUtils
+  @createFileRefHeader: (fullPath, line) ->
+        return (state) -> h("div", {
+            title: fullPath
+            style:
+              display: 'inline'
+          }
+          ["#{atom.project.relativizePath(fullPath)[1]} : #{line}"]
+        )
+
 exports.TreeView = TreeView
 exports.TreeViewItem = TreeViewItem
+exports.TreeViewUtils = TreeViewUtils

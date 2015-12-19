@@ -1,5 +1,5 @@
 Promise = require 'bluebird'
-{TreeView, TreeViewItem} = require './TreeView'
+{TreeView, TreeViewItem, TreeViewUtils} = require './TreeView'
 hg = require 'mercury'
 fs = require 'fs'
 {EventEmitter} = require 'events'
@@ -96,13 +96,7 @@ exports.create = (_debugger) ->
     frame: (frame) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
       return TreeView(
-          ((state) -> h('div', {
-            title: frame.script.name
-            style:
-              display: 'inline'
-            },
-            ["#{atom.project.relativizePath(frame.script.name)[1]}:#{frame.line + 1}"]
-          ))
+          TreeViewUtils.createFileRefHeader frame.script.name, frame.line + 1
           (() =>
             Promise.resolve([
               TreeView("arguments", (() => Promise.resolve(frame.arguments).map(builder.value)))
