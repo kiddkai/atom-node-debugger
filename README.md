@@ -23,6 +23,7 @@ You may access the commands using CMD/Ctrl+p or by using the shortcut key specif
 
 ```js
 'node-debugger:start-resume' (F5)
+'node-debugger:debug-active-file' (ctrl-F5)
 'node-debugger:stop' (shift-F5)
 'node-debugger:toggle-breakpoint' (F9)
 'node-debugger:step-next' (F10)
@@ -39,6 +40,9 @@ The following attributes can be set to control the node-debugger.
 * appArgs - arguments sent to the application during launch
 * debugPort - the port used to communicate to the launched process
 * env - the process environment variables (if left empty the environment will be inherited)
+* scriptMain - the preferred startup file.
+
+An example of a configuration is given below.
 ```CoffeeScript
 "node-debugger":
   nodePath: "C:/program/nodejs/node.exe"
@@ -46,7 +50,18 @@ The following attributes can be set to control the node-debugger.
   appArgs: "--arg1=10 --arg2"
   debugPort: 5860
   env: "key1=value1;key2=value2;key3=value3"  
+  scriptMain: "c:/myproject/main.js"
 ```
+
+## Debugging projects in atom
+When executing the start-resume command the node-debugger will try to figure out
+which file that is the main file of the current atom project.
+This is the strategy being used:
+
+1. use configured entry point (scriptMain)
+1. attempt to read entry point from package.json in the project root folder
+1. attempt to start currently open file (ctrl+F5 hot-key)
+1. cannot start debugger
 
 ## Troubleshooting
 

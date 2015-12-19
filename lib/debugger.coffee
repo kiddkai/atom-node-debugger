@@ -32,7 +32,7 @@ class ProcessManager extends EventEmitter
     @cleanup()
       .then =>
         packagePath = @atom.project.resolvePath('package.json')
-        packageJSON = require packagePath if fs.existsSync(packagePath)
+        packageJSON = JSON.parse(fs.readFileSync(packagePath)) if fs.existsSync(packagePath)
         nodePath = @atom.config.get('node-debugger.nodePath')
         nodeArgs = @atom.config.get('node-debugger.nodeArgs')
         appArgs = @atom.config.get('node-debugger.appArgs')
