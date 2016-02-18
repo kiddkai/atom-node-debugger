@@ -1,6 +1,5 @@
-NodeDebuggerView = require './node-debugger-view'
 {CompositeDisposable} = require 'atom'
-{Debugger, ProcessManager} = require './debugger'
+{Debugger} = require './debugger'
 jumpToBreakpoint = require './jump-to-breakpoint'
 logger = require './logger'
 os = require 'os'
@@ -32,17 +31,13 @@ module.exports =
     appArgs:
       type: 'string'
       default: ''
-    isCoffeeScript:
-      type: 'boolean'
-      default: false
     env:
       type: 'string'
       default: ''
 
   activate: () ->
     @disposables = new CompositeDisposable()
-    processManager = new ProcessManager(atom)
-    _debugger = new Debugger(atom, processManager)
+    _debugger = new Debugger(atom)
     @disposables.add _debugger.subscribeDisposable 'connected', ->
       atom.notifications.addSuccess('connected, enjoy debugging : )')
     @disposables.add _debugger.subscribeDisposable 'disconnected', ->
@@ -55,6 +50,7 @@ module.exports =
       'node-debugger:step-next': @stepNext
       'node-debugger:step-in': @stepIn
       'node-debugger:step-out': @stepOut
+      'node-debugger:attach': @attach
     })
 
     jumpToBreakpoint(_debugger)
@@ -63,15 +59,15 @@ module.exports =
     if _debugger.isConnected()
       _debugger.reqContinue()
     else
-      processManager.start()
-      NodeDebuggerView.show(_debugger)
+      _debugger.start()
+
+  attach: =>
+    return if _debugger.isConnected()
+    _debugger.attach()
 
   startActiveFile: =>
-    if _debugger.isConnected()
-      return
-    else
-      processManager.startActiveFile()
-      NodeDebuggerView.show(_debugger)
+    return if _debugger.isConnected()
+    _debugger.startActiveFile()
 
   toggleBreakpoint: =>
     editor = atom.workspace.getActiveTextEditor()
@@ -89,9 +85,7 @@ module.exports =
     _debugger.step('out', 1) if _debugger.isConnected()
 
   stop: =>
-    processManager.cleanup()
     _debugger.cleanup()
-    NodeDebuggerView.destroy()
     jumpToBreakpoint.cleanup()
 
   deactivate: ->
@@ -99,7 +93,6 @@ module.exports =
     jumpToBreakpoint.destroy()
     @stop()
     @disposables.dispose()
-    NodeDebuggerView.destroy()
     _debugger.dispose()
 
   serialize: ->

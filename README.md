@@ -29,18 +29,20 @@ You may access the commands using CMD/Ctrl+p or by using the shortcut key specif
 'node-debugger:step-next' (F10)
 'node-debugger:step-in' (F11)
 'node-debugger:step-out' (shift-F11)
+'node-debugger:attach'
 ```
 
 ## Configuration
 
 The following attributes can be set to control the node-debugger.
 
-* nodePath - path to node.js executable
-* nodeArgs - arguments sent to node.js during launch
-* appArgs - arguments sent to the application during launch
-* debugPort - the port used to communicate to the launched process
-* env - the process environment variables (if left empty the environment will be inherited)
-* scriptMain - the preferred startup file.
+* nodePath - path to node.js executable, _default: platform dependent_
+* nodeArgs - arguments sent to node.js during launch, _default: ''_
+* appArgs - arguments sent to the application during launch, _default: ''_
+* debugHost - the machine name or ip-address of the host (only used when attaching to external node processes), _default: '127.0.0.1'_
+* debugPort - the port used to communicate to the launched process, _default: 5858_
+* env - the process environment variables (if left empty the environment will be inherited), _default: ''_
+* scriptMain - the preferred startup file, _default: ''_
 
 An example of a configuration is given below.
 ```CoffeeScript
@@ -48,6 +50,7 @@ An example of a configuration is given below.
   nodePath: "C:/program/nodejs/node.exe"
   nodeArgs: "--use-strict --use_inlining"
   appArgs: "--arg1=10 --arg2"
+  debugHost: "192.168.0.20"
   debugPort: 5860
   env: "key1=value1;key2=value2;key3=value3"  
   scriptMain: "c:/myproject/main.js"
@@ -62,6 +65,22 @@ This is the strategy being used:
 1. attempt to read entry point from package.json in the project root folder
 1. attempt to start currently open file (ctrl+F5 hot-key)
 1. cannot start debugger
+
+## Attaching to external processes
+Start your node application in debug mode using
+
+```Batch
+>node --debug=5858 a.js
+```
+
+or
+
+```Batch
+>node --debug-brk=5858 a.js
+```
+
+Back in the atom editor, execute command node-debugger: attach using the
+atom command panel.
 
 ## Troubleshooting
 

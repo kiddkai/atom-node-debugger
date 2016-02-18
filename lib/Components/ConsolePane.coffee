@@ -94,6 +94,10 @@ exports.create = (_debugger) ->
         .pipe(split())
         .pipe(newWriter())
 
+    _debugger.on 'reconnect', ({count,host,port,timeout}) ->
+      message = "Connection attempt #{count} to node process on #{host}:#{port} failed. Will try again in #{timeout}."
+      state.lines.push(message)
+
     return state
 
   ConsolePane.render = (state) ->

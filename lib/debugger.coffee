@@ -8,6 +8,7 @@ childprocess = require 'child_process'
 Event = require 'geval/event'
 logger = require './logger'
 fs = require 'fs'
+NodeDebuggerView = require './node-debugger-view'
 
 log = (msg) -> # console.log(msg)
 
@@ -225,7 +226,7 @@ class BreakpointManager
     breakpoint.editor.decorateMarker(breakpoint.marker, type: 'line-number', class: className)
 
 class Debugger extends EventEmitter
-  constructor: (@atom, @processManager)->
+  constructor: (@atom)->
     super()
     @client = null
     @breakpointManager = new BreakpointManager(this)
@@ -233,12 +234,14 @@ class Debugger extends EventEmitter
     @onBreak = @onBreakEvent.listen
     @onAddBreakpoint = @breakpointManager.onAddBreakpointEvent.listen
     @onRemoveBreakpoint = @breakpointManager.onRemoveBreakpointEvent.listen
-    @processManager.on 'processCreated', @start
-    @processManager.on 'processEnd', @cleanup
+    @processManager = new ProcessManager(@atom)
+    @processManager.on 'processCreated', @attachInternal
+    @processManager.on 'processEnd', @cleanupInternal
 
   dispose: ->
     @breakpointManager.dispose() if @breakpointManager
     @breakpointManager = null
+    NodeDebuggerView.destroy()
 
   stopRetrying: ->
     return unless @timeout?
@@ -281,7 +284,28 @@ class Debugger extends EventEmitter
         resolve(res)
 
   start: =>
+      @debugHost = "127.0.0.1"
+      @debugPort = self.atom.config.get('node-debugger.debugPort')
+      @externalProcess = false
+      @processManager.start()
+      # debugger will attach when process is started
+
+  startActiveFile: =>
+      @debugHost = "127.0.0.1"
+      @debugPort = self.atom.config.get('node-debugger.debugPort')
+      @externalProcess = false
+      @processManager.startActiveFile()
+      # debugger will attach when process is started
+
+  attach: =>
+    @debugHost = @atom.config.get('node-debugger.debugHost')
+    @debugPort = self.atom.config.get('node-debugger.debugPort')
+    @externalProcess = true
+    @attachInternal()
+
+  attachInternal: =>
     logger.info 'debugger', 'start connect to process'
+    NodeDebuggerView.show(this)
     self = this
     attemptConnectCount = 0
     attemptConnect = ->
@@ -291,17 +315,22 @@ class Debugger extends EventEmitter
         return
       attemptConnectCount++
       self.client.connect(
-        self.atom.config.get('node-debugger.debugPort'),
-        self.atom.config.get('node-debugger.debugHost')
+        self.debugPort,
+        self.debugHost
       )
 
     onConnectionError = =>
       logger.info 'debugger', "trying to reconnect #{attemptConnectCount}"
-      attemptConnectCount++
-      @emit 'reconnect', attemptConnectCount
+      timeout = 500
+      @emit 'reconnect', {
+        count: attemptConnectCount
+        port: self.debugPort
+        host: self.debugHost
+        timeout: timeout
+      }
       @timeout = setTimeout =>
         attemptConnect()
-      , 500
+      , timeout
 
     @client = new Client()
     @client.once 'ready', @bindEvents
@@ -342,13 +371,17 @@ class Debugger extends EventEmitter
         return resolve(result)
 
   cleanup: =>
-    return unless @client?
-    @client.destroy()
+    @processManager.cleanup()
+    @cleanupInternal()
+
+  cleanupInternal: =>
+    @client.destroy() if @client
     @client = null
+    NodeDebuggerView.destroy()
     @emit 'disconnected'
 
   isConnected: =>
       return @client?
 
-exports.ProcessManager = ProcessManager
 exports.Debugger = Debugger
+exports.ProcessManager = ProcessManager
