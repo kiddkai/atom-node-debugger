@@ -13,6 +13,10 @@
           'command': 'node-debugger:start-active-file'
         },
         {
+          'label': 'Attach'
+          'command': 'node-debugger:attach'
+        },
+        {
           'label': 'Stop'
           'command': 'node-debugger:stop'
         },
