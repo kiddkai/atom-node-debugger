@@ -131,6 +131,7 @@ exports.create = (_debugger) ->
         style: {
           flex: '1'
           overflow: 'auto'
+          "font-family": "Menlo, Consolas, 'DejaVu Sans Mono', monospace"
         }
       }, state.lines.map(tokenizeLine))
       h('div.debugger-editor', style: {
