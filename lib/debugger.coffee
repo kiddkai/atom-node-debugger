@@ -12,10 +12,8 @@ NodeDebuggerView = require './node-debugger-view'
 
 log = (msg) -> # console.log(msg)
 
-class ProcessManager extends EventEmitter
-  constructor: (@atom = atom)->
-    super()
-    @process = null
+class ProcessStartInfoFactory
+  constructor: (@atom) ->
 
   parseEnv: (env) ->
     return null unless env
@@ -25,35 +23,46 @@ class ProcessManager extends EventEmitter
     result[key(e)] = value(e) for e in env.split(";")
     return result
 
-  startActiveFile: () ->
-    @start true
+  createDefault: (appPath, appArgs) ->
+    return {
+      nodePath: @atom.config.get('node-debugger.nodePath')
+      nodeArgs: @atom.config.get('node-debugger.nodeArgs')
+      nodePort: @atom.config.get('node-debugger.debugPort')
+      env: @parseEnv @atom.config.get('node-debugger.env')
+      appPath: appPath
+      appArgs: appArgs or @atom.config.get('node-debugger.appArgs')
+    }
 
-  start: (withActiveFile) ->
-    startActive = withActiveFile
+  create: (startActive) ->
+    packagePath = @atom.project.resolvePath('package.json')
+    packageJSON = JSON.parse(fs.readFileSync(packagePath)) if fs.existsSync(packagePath)
+    scriptMain = @atom.project.resolvePath(@atom.config.get('node-debugger.scriptMain'))
+    appPath = scriptMain || packageJSON && @atom.project.resolvePath(packageJSON.main)
+    if startActive == true || !appPath
+      editor = atom.workspace.getActiveTextEditor()
+      appPath = editor.getPath()
+    return @createDefault(appPath)
+
+  createMocha: () ->
+    appPath = @atom.config.get('node-debugger.mochaPath')
+    editor = atom.workspace.getActiveTextEditor()
+    appArgs = "-R spec -u tdd #{editor.getPath()}"
+    return @createDefault(appPath, appArgs)
+
+class ProcessManager extends EventEmitter
+  constructor: (@atom = atom)->
+    super()
+    @process = null
+
+  start: ({nodePath, nodeArgs, nodePort, appPath, appArgs, env}) ->
     @cleanup()
       .then =>
-        packagePath = @atom.project.resolvePath('package.json')
-        packageJSON = JSON.parse(fs.readFileSync(packagePath)) if fs.existsSync(packagePath)
-        nodePath = @atom.config.get('node-debugger.nodePath')
-        nodeArgs = @atom.config.get('node-debugger.nodeArgs')
-        appArgs = @atom.config.get('node-debugger.appArgs')
-        port = @atom.config.get('node-debugger.debugPort')
-        env = @parseEnv @atom.config.get('node-debugger.env')
-        scriptMain = @atom.project.resolvePath(@atom.config.get('node-debugger.scriptMain'))
-
-        dbgFile = scriptMain || packageJSON && @atom.project.resolvePath(packageJSON.main)
-
-        if startActive == true || !dbgFile
-          editor = @atom.workspace.getActiveTextEditor()
-          appPath = editor.getPath()
-          dbgFile = appPath
-
-        cwd = path.dirname(dbgFile)
+        cwd = path.dirname(appPath)
 
         args = []
         args = args.concat (nodeArgs.split(' ')) if nodeArgs
-        args.push "--debug-brk=#{port}"
-        args.push dbgFile
+        args.push "--debug-brk=#{nodePort}"
+        args.push appPath
         args = args.concat (appArgs.split(' ')) if appArgs
 
         logger.error 'spawn', {args:args, env:env}
@@ -237,6 +246,7 @@ class Debugger extends EventEmitter
     @processManager = new ProcessManager(@atom)
     @processManager.on 'processCreated', @attachInternal
     @processManager.on 'processEnd', @cleanupInternal
+    @processStartInfoFactory = new ProcessStartInfoFactory(@atom)
 
   dispose: ->
     @breakpointManager.dispose() if @breakpointManager
@@ -288,7 +298,7 @@ class Debugger extends EventEmitter
       @debugPort = self.atom.config.get('node-debugger.debugPort')
       @externalProcess = false
       NodeDebuggerView.show(this)
-      @processManager.start()
+      @processManager.start(@processStartInfoFactory.create(false))
       # debugger will attach when process is started
 
   startActiveFile: =>
@@ -296,7 +306,15 @@ class Debugger extends EventEmitter
       @debugPort = self.atom.config.get('node-debugger.debugPort')
       @externalProcess = false
       NodeDebuggerView.show(this)
-      @processManager.startActiveFile()
+      @processManager.start(@processStartInfoFactory.create(true))
+      # debugger will attach when process is started
+
+  startTest: =>
+      @debugHost = "127.0.0.1"
+      @debugPort = self.atom.config.get('node-debugger.debugPort')
+      @externalProcess = false
+      NodeDebuggerView.show(this)
+      @processManager.start(@processStartInfoFactory.createMocha(true))
       # debugger will attach when process is started
 
   attach: =>
@@ -316,20 +334,20 @@ class Debugger extends EventEmitter
         logger.info 'debugger', 'client has been cleanup'
         return
       attemptConnectCount++
+      @emit 'reconnect', {
+        count: attemptConnectCount
+        port: self.debugPort
+        host: self.debugHost
+        timeout: timeout
+      } if attemptConnectCount > 1
       self.client.connect(
         self.debugPort,
         self.debugHost
       )
 
     onConnectionError = =>
-      logger.info 'debugger', "trying to reconnect #{attemptConnectCount}"
       timeout = 500
-      @emit 'reconnect', {
-        count: attemptConnectCount
-        port: self.debugPort
-        host: self.debugHost
-        timeout: timeout
-      }
+      logger.info 'debugger', "trying to reconnect #{attemptConnectCount}"
       @timeout = setTimeout =>
         attemptConnect()
       , timeout
@@ -379,7 +397,7 @@ class Debugger extends EventEmitter
   cleanupInternal: =>
     @client.destroy() if @client
     @client = null
-    NodeDebuggerView.destroy()
+    #NodeDebuggerView.destroy()
     @emit 'disconnected'
 
   isConnected: =>

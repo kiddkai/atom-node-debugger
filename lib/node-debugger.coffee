@@ -51,6 +51,7 @@ module.exports =
       'node-debugger:step-in': @stepIn
       'node-debugger:step-out': @stepOut
       'node-debugger:attach': @attach
+      'node-debugger:debug-tests-in-current-file': @debugTestsInCurrentFile
     })
 
     jumpToBreakpoint(_debugger)
@@ -68,6 +69,10 @@ module.exports =
   startActiveFile: =>
     return if _debugger.isConnected()
     _debugger.startActiveFile()
+
+  debugTestsInCurrentFile: =>
+    return if _debugger.isConnected()
+    _debugger.startTest()
 
   toggleBreakpoint: =>
     editor = atom.workspace.getActiveTextEditor()
