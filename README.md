@@ -79,8 +79,11 @@ or
 >node --debug-brk=5858 a.js
 ```
 
-Back in the atom editor, execute command node-debugger: attach using the
-atom command panel.
+Make sure that your node-debugger settings for debugHost and debugPort are
+matching what you are using. In the case above debugPort should be 5858.
+
+Execute command node-debugger: attach either from the menu or using the command
+panel.
 
 ## Troubleshooting
 
