@@ -17,6 +17,10 @@
           'command': 'node-debugger:attach'
         },
         {
+          'label': 'Debug Current Test'
+          'command': 'node-debugger:debug-tests-in-current-file'
+        },
+        {
           'label': 'Stop'
           'command': 'node-debugger:stop'
         },

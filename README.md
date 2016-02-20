@@ -85,6 +85,17 @@ matching what you are using. In the case above debugPort should be 5858.
 Execute command node-debugger: attach either from the menu or using the command
 panel.
 
+## Debugging mocha tests (experimental)
+In order to debug mocha tests you need to set the mochaPath to point to the \_mocha file in your mocha bin directory.
+
+```CoffeeScript
+"node-debugger":
+  mochaPath:
+    "C:/Users/MyUserName/AppData/Roaming/npm/node_modules/mocha/bin/_mocha"
+```
+
+Having that done it is possible to open a test file and launch the debug-tests-in-current-file command.
+
 ## Troubleshooting
 
 Check in the node-debugger package settings that the node path is set correctly.
