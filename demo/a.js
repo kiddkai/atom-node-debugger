@@ -43,6 +43,17 @@ console.error('this is an error')
 
 var d = 10;
 
+var Person = function (firstName, lastName) {
+  this.firstName = firstName;
+  this.lastName = lastName;
+  this.toString = function() {
+    return firstName + " " + lastName;
+  }
+};
+
+var person = new Person('Alice', 'Babs');
+console.log(person.toString());
+
 b(100, function(err, res) {
   result = res
   console.log('result is: ', result)
