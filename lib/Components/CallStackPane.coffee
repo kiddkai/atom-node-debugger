@@ -90,7 +90,7 @@ exports.create = (_debugger) ->
           TreeViewItem("#{name} : function() { ... }")
         when 'object'
           decorate = (title) -> (state) -> if state.isOpen then title else "#{title} { ... }"
-          ref = value.value.ref
+          ref = value.value.ref || value.value.handle
           TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)))
 
     frame: (frame) ->
@@ -128,13 +128,26 @@ exports.create = (_debugger) ->
   builder2 =
     selectedFrame: null
 
+    loadThis: () ->
+      _debugger.eval("this")
+      .then (result) ->
+        return [{
+          name: "___this___"
+          value: result
+        }]
+      .catch ->
+        return []
+
     loadLocals: () ->
       framePromise = if builder2.selectedFrame then Promise.resolve(builder2.selectedFrame)
       else builder.loadFrames().then (frames) -> return frames[0]
+      thisPromise = builder2.loadThis()
 
-      framePromise
-      .then (frame) ->
-        return frame.arguments.concat(frame.locals)
+      Promise.all [framePromise, thisPromise]
+      .then (result) ->
+        frame = result[0]
+        _this = result[1]
+        return _this.concat(frame.arguments.concat(frame.locals))
 
     root: () ->
       sortLocals = (locals) ->
