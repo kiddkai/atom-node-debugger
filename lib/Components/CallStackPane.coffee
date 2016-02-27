@@ -137,7 +137,10 @@ exports.create = (_debugger) ->
         return frame.arguments.concat(frame.locals)
 
     root: () ->
-      TreeView("Locals", (() -> builder2.loadLocals().map(builder.value)), isRoot:true)
+      sortLocals = (locals) ->
+        locals.sort((a,b) -> a.name.localeCompare(b.name));
+        return locals;
+      TreeView("Locals", (() -> builder2.loadLocals().then(sortLocals).map(builder.value)), isRoot:true)
 
   LocalsPane = () ->
     state = builder2.root()
