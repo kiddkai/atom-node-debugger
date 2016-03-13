@@ -285,7 +285,7 @@ class Debugger extends EventEmitter
 
   start: =>
       @debugHost = "127.0.0.1"
-      @debugPort = self.atom.config.get('node-debugger.debugPort')
+      @debugPort = @atom.config.get('node-debugger.debugPort')
       @externalProcess = false
       NodeDebuggerView.show(this)
       @processManager.start()
@@ -293,7 +293,7 @@ class Debugger extends EventEmitter
 
   startActiveFile: =>
       @debugHost = "127.0.0.1"
-      @debugPort = self.atom.config.get('node-debugger.debugPort')
+      @debugPort = @atom.config.get('node-debugger.debugPort')
       @externalProcess = false
       NodeDebuggerView.show(this)
       @processManager.startActiveFile()
@@ -301,7 +301,7 @@ class Debugger extends EventEmitter
 
   attach: =>
     @debugHost = @atom.config.get('node-debugger.debugHost')
-    @debugPort = self.atom.config.get('node-debugger.debugPort')
+    @debugPort = @atom.config.get('node-debugger.debugPort')
     @externalProcess = true
     NodeDebuggerView.show(this)
     @attachInternal()
