@@ -374,12 +374,12 @@ class Debugger extends EventEmitter
 
   cleanup: =>
     @processManager.cleanup()
+    NodeDebuggerView.destroy()
     @cleanupInternal()
 
   cleanupInternal: =>
     @client.destroy() if @client
     @client = null
-    NodeDebuggerView.destroy()
     @emit 'disconnected'
 
   isConnected: =>
