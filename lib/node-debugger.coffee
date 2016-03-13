@@ -1,6 +1,5 @@
 {CompositeDisposable} = require 'atom'
 {Debugger} = require './debugger'
-jumpToBreakpoint = require './jump-to-breakpoint'
 logger = require './logger'
 os = require 'os'
 
@@ -53,8 +52,6 @@ module.exports =
       'node-debugger:attach': @attach
     })
 
-    jumpToBreakpoint(_debugger)
-
   startOrResume: =>
     if _debugger.isConnected()
       _debugger.reqContinue()
@@ -86,11 +83,9 @@ module.exports =
 
   stop: =>
     _debugger.cleanup()
-    jumpToBreakpoint.cleanup()
 
   deactivate: ->
     logger.info 'deactive', 'stop running plugin'
-    jumpToBreakpoint.destroy()
     @stop()
     @disposables.dispose()
     _debugger.dispose()

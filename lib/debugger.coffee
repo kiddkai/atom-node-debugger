@@ -9,6 +9,7 @@ Event = require 'geval/event'
 logger = require './logger'
 fs = require 'fs'
 NodeDebuggerView = require './node-debugger-view'
+jumpToBreakpoint = require './jump-to-breakpoint'
 
 log = (msg) -> # console.log(msg)
 
@@ -237,11 +238,13 @@ class Debugger extends EventEmitter
     @processManager = new ProcessManager(@atom)
     @processManager.on 'processCreated', @attachInternal
     @processManager.on 'processEnd', @cleanupInternal
+    jumpToBreakpoint(this)
 
   dispose: ->
     @breakpointManager.dispose() if @breakpointManager
     @breakpointManager = null
     NodeDebuggerView.destroy()
+    jumpToBreakpoint.destroy()
 
   stopRetrying: ->
     return unless @timeout?
@@ -374,12 +377,13 @@ class Debugger extends EventEmitter
 
   cleanup: =>
     @processManager.cleanup()
+    NodeDebuggerView.destroy()
     @cleanupInternal()
 
   cleanupInternal: =>
     @client.destroy() if @client
     @client = null
-    NodeDebuggerView.destroy()
+    jumpToBreakpoint.cleanup()
     @emit 'disconnected'
 
   isConnected: =>

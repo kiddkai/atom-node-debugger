@@ -4,7 +4,7 @@ hg = require 'mercury'
 exports.create = (_debugger) ->
 
   cancel = () ->
-    _debugger.processManager.cleanup()
+    _debugger.cleanup()
 
   hg.state({
     channels: {
