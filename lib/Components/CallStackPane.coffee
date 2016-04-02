@@ -48,14 +48,23 @@ exports.create = (_debugger) ->
       .lookup(ref)
       .then (instance) ->
         log "builder.loadProperties: instance loaded"
-        Promise
-        .map instance.properties, (prop) ->
-          _debugger.lookup(prop.ref)
-        .then (values) ->
-          log "builder.loadProperties: property values loaded"
-          values.forEach (value, idx) ->
-            instance.properties[idx].value = value
-          return instance.properties
+        if instance.className is "Date"
+          return [{
+              name: "value"
+              value:
+                type: "string"
+                className: "string"
+                value: instance.value
+            }]
+        else
+          Promise
+          .map instance.properties, (prop) ->
+            _debugger.lookup(prop.ref)
+          .then (values) ->
+            log "builder.loadProperties: property values loaded"
+            values.forEach (value, idx) ->
+              instance.properties[idx].value = value
+            return instance.properties
 
     # helper: move to debugger?
     loadFrames: () ->

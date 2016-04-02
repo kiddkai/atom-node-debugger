@@ -29,6 +29,7 @@ var e = {
 
 var strVal = "a string value";
 var arrVal = [1,2,3,4];
+var dateVal = new Date(1994, 02, 24, 12, 34);
 
 function localFunc(arg1, arg2) {
   var zz = 10;
