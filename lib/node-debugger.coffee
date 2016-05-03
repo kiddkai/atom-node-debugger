@@ -8,7 +8,6 @@ _debugger = null
 onBreak = null
 
 module.exports =
-  nodeDebuggerView: null
   config:
     nodePath:
       type: 'string'
@@ -89,6 +88,3 @@ module.exports =
     @stop()
     @disposables.dispose()
     _debugger.dispose()
-
-  serialize: ->
-    nodeDebuggerViewState: @nodeDebuggerView.serialize()
