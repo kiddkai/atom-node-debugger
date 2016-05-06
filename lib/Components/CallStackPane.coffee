@@ -4,6 +4,7 @@ hg = require 'mercury'
 fs = require 'fs'
 {EventEmitter} = require 'events'
 {h} = hg
+FocusHook = require('./focus-hook');
 
 #######################################
 
@@ -86,7 +87,7 @@ exports.create = (_debugger) ->
         }
       })
 
-    value: (value) ->
+    value: (value, handlers) ->
       log "builder.value"
       name = value.name
       type = value.value.type
@@ -94,13 +95,13 @@ exports.create = (_debugger) ->
       switch(type)
         when 'string', 'boolean', 'number', 'undefined', 'null'
           value = value.value.value
-          TreeViewItem("#{name} : #{value}")
+          TreeViewItem("#{name} : #{value}", handlers: handlers)
         when 'function'
-          TreeViewItem("#{name} : function() { ... }")
+          TreeViewItem("#{name} : function() { ... }", handlers: handlers)
         when 'object'
           decorate = (title) -> (state) -> if state.isOpen then title else "#{title} { ... }"
           ref = value.value.ref || value.value.handle
-          TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)))
+          TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)), handlers: handlers)
 
     frame: (frame) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
@@ -176,9 +177,119 @@ exports.create = (_debugger) ->
   LocalsPane.render = (state) ->
     TreeView.render(state)
 
+  TreeViewWatchItem = (expression) -> hg.state({
+      expression: hg.value(expression)
+      value: hg.array([]) # keeping the sub component in an array is a workaround. hg.value causes problem of not re-rendering when expanding expressions
+      editMode: hg.value(false)
+      deleted: hg.value(false)
+      channels: {
+        startEdit:
+          (state) ->
+            log "TreeViewWatchItem.dblclick"
+            state.editMode.set(true)
+        cancelEdit:
+          (state) ->
+            state.editMode.set(false)
+        finishEdit:
+          (state, data) ->
+            return unless state.editMode()
+            state.expression.set(data.expression)
+            TreeViewWatchItem.load(state)
+            state.editMode.set(false)
+            state.deleted.set(true) if data.expression is ""
+      }
+      functors: {
+        render: TreeViewWatchItem.render
+      }
+    })
+
+  TreeViewWatchItem.load = (state) ->
+      log "TreeViewWatchItem.load #{state.expression()}"
+      if state.expression() is ""
+        return new Promise (resolve) ->
+          t = TreeViewItem("<expression not set - double click to edit>", handlers: { dblclick: () => state.editMode.set(true) })
+          state.value.set([t])
+          resolve(state)
+
+      _debugger.eval(state.expression())
+      .then (result) =>
+        ref = { name: state.expression(), value: result }
+        t = builder.value(ref, { dblclick: () => state.editMode.set(true) })
+        state.value.set([t])
+        return state
+      .catch (error) =>
+        t = TreeViewItem("#{state.expression()} : #{error}", handlers: { dblclick: () => state.editMode.set(true) })
+        state.value.set([t])
+        return state
+
+  TreeViewWatchItem.render = (state) ->
+    return h('div', {}, []) if state.deleted
+    ESCAPE = 27
+    content =
+      if state.editMode
+        input = h("input.form-control.input-sm.native-key-bindings", {
+            value: state.expression
+            name: "expression"
+            placeholder: "clear content to delete slot" if state.expression is ""
+            # when we need an RPC invocation we add a
+            # custom mutable operation into the tree to be
+            # invoked at patch time
+            'ev-focus': FocusHook() if state.editMode,
+            'ev-keydown': hg.sendKey(state.channels.cancelEdit, null, {key: ESCAPE}),
+            'ev-event': hg.sendSubmit(state.channels.finishEdit)
+            'ev-blur': hg.sendValue(state.channels.finishEdit)
+            style: {
+              display: 'inline'
+            }
+          }, [])
+        h('li.list-item.entry', { 'ev-dblclick': hg.send(state.channels.startEdit) }, [input])
+      else
+        state.value.map(TreeView.render)[0]
+    content
+
+  builder3 =
+    root: () ->
+      evalExpressions = (state) ->
+        filtered = state.items.filter (x) -> not(x.deleted())
+        newstate = filtered.map TreeViewWatchItem.load
+        result = []
+        newstate.forEach (x) -> result.push(x)
+        Promise.all(result)
+
+      title = (state) ->
+        h("span", {}, [
+          "Watch"
+          h("input.btn.btn-xs", {
+              type: "button"
+              value: "+"
+              style:
+                'margin': '1px 1px 2px 5px'
+              'ev-click':
+                  hg.send state.channels.customEvent
+          }, [])
+        ])
+
+      return TreeView(title, evalExpressions, isRoot:true, handlers: {
+          customEvent: (state) ->
+            log "TreeViewWatch custom event handler invoked"
+            TreeViewWatchItem.load(TreeViewWatchItem("")).then (i) ->
+              state.items.push(i)
+        })
+
+  WatchPane = () ->
+    state = builder3.root()
+    refresh = () -> TreeView.populate(state)
+    _debugger.onBreak () =>
+        refresh()
+    return state
+
+  WatchPane.render = (state) ->
+    TreeView.render(state)
+
   return {
     CallStackPane: CallStackPane
     LocalsPane: LocalsPane
+    WatchPane: WatchPane
   }
 
 exports.cleanup = () ->

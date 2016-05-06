@@ -4,7 +4,7 @@ Promise = require 'bluebird'
 
 log = (msg) -> #console.log(msg)
 
-TreeView = (title, loadChildren, { handlers, data, isRoot } = {}) ->
+TreeView = (title, loadChildren, { handlers, isRoot } = {}) ->
   log "TreeView constructor. title=#{title}, isRoot=#{isRoot}"
   return hg.state({
       isRoot: hg.value(isRoot)
@@ -13,12 +13,20 @@ TreeView = (title, loadChildren, { handlers, data, isRoot } = {}) ->
       isOpen: hg.value(false)
       loading: hg.value(false)
       loaded: hg.value(false)
-      data: data
       channels: {
         click:
           (state) ->
+            log "TreeView event handler for click invoked"
             TreeView.toggle(state)
-            handlers?.click?(state.data)
+            handlers?.click?(state)
+        dblclick:
+          (state) ->
+            log "TreeView event handler for dblclick invoked"
+            handlers?.dblclick?(state)
+        customEvent:
+          (state) ->
+            log "TreeView event handler for customEvent invoked"
+            handlers?.customEvent?(state)
       }
       functors: {
         render: TreeView.defaultRender
@@ -44,14 +52,13 @@ TreeView.reset = (state) ->
 TreeView.populate = (state) ->
   log "TreeView.populate"
   state.loading.set(true)
-  state.functors.loadChildren()
+  state.functors.loadChildren(state)
   .then (children) ->
     log "TreeView.populate: children loaded. count=#{children.length})"
     state.items.set(children)
-  .then () ->
-    log "TreeView.populate: all done"
     state.loaded.set(true)
     state.loading.set(false)
+    log "TreeView.populate: all done"
   .catch (e) ->
     log("TreeView.populate:error!!!" + JSON.stringify(e))
     state.loaded.set(false)
@@ -66,7 +73,10 @@ TreeView.defaultRender = (state) ->
   result = h('li.list-nested-item', {
         className: if state.isOpen then '' else 'collapsed'
       }, [
-        h('div.header.list-item' + (if state.isRoot then '.heading' else ''), { 'ev-click': hg.send state.channels.click }, [title]),
+        h('div.header.list-item' + (if state.isRoot then '.heading' else ''), {
+          'ev-click': hg.send state.channels.click
+          'ev-dblclick': hg.send state.channels.dblclick
+        }, [title]),
         h('ul.entries.list-tree', {}, state.items.map(TreeView.render))
       ])
 
@@ -75,12 +85,17 @@ TreeView.defaultRender = (state) ->
     ]) if state.isRoot
   return result
 
-TreeViewItem = (value, { handlers, data } = {}) -> hg.state({
+TreeViewItem = (value, { handlers } = {}) -> hg.state({
     value: hg.value(value)
-    data: data
     channels: {
       click:
-        (state) -> handlers?.click?(state.data)
+        (state) ->
+          log "TreeViewItem event handler for click invoked"
+          handlers?.click?(state)
+      dblclick:
+        (state) ->
+          log "TreeViewItem event handler for dblclick invoked"
+          handlers?.dblclick?(state)
     }
     functors: {
       render: TreeViewItem.render
@@ -88,7 +103,10 @@ TreeViewItem = (value, { handlers, data } = {}) -> hg.state({
   })
 
 TreeViewItem.render = (state) ->
-  h('li.list-item.entry', { 'ev-click': hg.send state.channels.click }, [state.value?(state) ? state.value])
+  h('li.list-item.entry', {
+    'ev-click': hg.send state.channels.click
+    'ev-dblclick': hg.send state.channels.dblclick
+  }, [state.value?(state) ? state.value])
 
 class TreeViewUtils
   @createFileRefHeader: (fullPath, line) ->
