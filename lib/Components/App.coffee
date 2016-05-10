@@ -153,5 +153,5 @@ exports.start = (root, _debugger) ->
   hg.app(root, App(), App.render)
 
 exports.stop = ->
-  BreakPointPane.cleanup() if BreakPointPane
+  BreakPointPane.cleanup()
   callstackPaneModule.cleanup()

@@ -2,13 +2,13 @@ Promise = require 'bluebird'
 {TreeView, TreeViewItem, TreeViewUtils} = require './TreeView'
 hg = require 'mercury'
 fs = require 'fs'
-{EventEmitter} = require 'events'
+{EventEmitter} = require '../eventing'
 {h} = hg
 FocusHook = require('./focus-hook');
 
 #######################################
 
-removeBreakListener = null
+listeners = []
 
 log = (msg) -> #console.log(msg)
 
@@ -126,7 +126,7 @@ exports.create = (_debugger) ->
 
   CallStackPane = () ->
     state = builder.root()
-    removeBreakListener = _debugger.onBreak () ->
+    listeners.push _debugger.onBreak () ->
       log "Debugger.break"
       TreeView.reset(state)
       eventEmitter.emit('frame-selected', null)
@@ -168,7 +168,7 @@ exports.create = (_debugger) ->
   LocalsPane = () ->
     state = builder2.root()
     refresh = () -> TreeView.populate(state)
-    eventEmitter.on 'frame-selected', (frame) ->
+    listeners.push eventEmitter.subscribe 'frame-selected', (frame) ->
       log "Frame selected"
       builder2.selectedFrame = frame
       refresh()
@@ -279,8 +279,7 @@ exports.create = (_debugger) ->
   WatchPane = () ->
     state = builder3.root()
     refresh = () -> TreeView.populate(state)
-    _debugger.onBreak () =>
-        refresh()
+    listeners.push _debugger.onBreak () -> refresh()
     return state
 
   WatchPane.render = (state) ->
@@ -293,4 +292,6 @@ exports.create = (_debugger) ->
   }
 
 exports.cleanup = () ->
-  removeBreakListener() if removeBreakListener?
+  for remove in listeners
+    log "removing listener"
+    remove()
