@@ -2,6 +2,8 @@ hg = require 'mercury'
 Promise = require 'bluebird'
 {h} = hg
 
+listeners = []
+
 log = (msg) -> #console.log(msg)
 
 {TreeView, TreeViewItem, TreeViewUtils} = require './TreeView'
@@ -33,15 +35,16 @@ exports.create = (_debugger) ->
   BreakpointPanel = () ->
     state = builder.root()
     refresh = () -> TreeView.populate(state)
-    _debugger.onAddBreakpoint refresh
-    _debugger.onRemoveBreakpoint refresh
-    _debugger.onBreak refresh
+    listeners.push _debugger.onAddBreakpoint refresh
+    listeners.push _debugger.onRemoveBreakpoint refresh
+    listeners.push _debugger.onBreak refresh
     return state
 
   BreakpointPanel.render = (state) ->
     TreeView.render(state)
 
   BreakpointPanel.cleanup = () ->
-    removeListener() if removeListener?
+    for remove in listeners
+      remove()
 
   return BreakpointPanel
