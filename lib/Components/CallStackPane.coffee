@@ -42,7 +42,6 @@ exports.create = (_debugger) ->
   eventEmitter = new EventEmitter()
 
   builder =
-    # helper: move to debugger?
     loadProperties: (ref) ->
       log "builder.loadProperties #{ref}"
       _debugger
@@ -67,7 +66,14 @@ exports.create = (_debugger) ->
               instance.properties[idx].value = value
             return instance.properties
 
-    # helper: move to debugger?
+    loadArrayLength: (ref) ->
+      _debugger
+      .lookup(ref)
+      .then (instance) ->
+        _debugger.lookup(instance.properties[0].ref)
+      .then (result) ->
+        result.value
+
     loadFrames: () ->
       log "builder.loadFrames"
       _debugger.fullTrace()
@@ -99,9 +105,21 @@ exports.create = (_debugger) ->
         when 'function'
           TreeViewItem("#{name} : function() { ... }", handlers: handlers)
         when 'object'
-          decorate = (title) -> (state) -> if state.isOpen then title else "#{title} { ... }"
           ref = value.value.ref || value.value.handle
-          TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)), handlers: handlers)
+          isArray = className is "Array"
+          (if isArray then builder.loadArrayLength(ref) else Promise.resolve(0)).then (len) ->
+            decorate =
+              (title) ->
+                (state) ->
+                  if state.isOpen
+                    title
+                  else
+                    if isArray
+                      "#{title} [ #{len} ]"
+                    else
+                      "#{title} { ... }"
+
+            TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)), handlers: handlers)
 
     frame: (frame) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
@@ -214,7 +232,8 @@ exports.create = (_debugger) ->
       _debugger.eval(state.expression())
       .then (result) =>
         ref = { name: state.expression(), value: result }
-        t = builder.value(ref, { dblclick: () => state.editMode.set(true) })
+        builder.value(ref, { dblclick: () => state.editMode.set(true) })
+      .then (t) =>
         state.value.set([t])
         return state
       .catch (error) =>
@@ -293,5 +312,4 @@ exports.create = (_debugger) ->
 
 exports.cleanup = () ->
   for remove in listeners
-    log "removing listener"
     remove()
