@@ -245,9 +245,8 @@ class Debugger extends EventEmitter
 
   getSelectedFrame: () => @selectedFrame
   setSelectedFrame: (frame, index) =>
-      @selectedFrame = frame
-      @client.currentFrame = index or -1
-      @onSelectedFrameEvent.broadcast({frame, index})
+      @selectedFrame = {frame, index}
+      @onSelectedFrameEvent.broadcast(@selectedFrame)
 
   dispose: ->
     @breakpointManager.dispose() if @breakpointManager
@@ -378,7 +377,7 @@ class Debugger extends EventEmitter
 
   eval: (text) ->
     new Promise (resolve, reject) =>
-      @client.reqFrameEval text, @client.currentFrame, (err, result) ->
+      @client.reqFrameEval text, @selectedFrame?.index or 0, (err, result) ->
         return reject(err) if err
         return resolve(result)
 

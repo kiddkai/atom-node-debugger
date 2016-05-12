@@ -289,6 +289,7 @@ exports.create = (_debugger) ->
       return TreeView(title, evalExpressions, isRoot:true, handlers: {
           customEvent: (state) ->
             log "TreeViewWatch custom event handler invoked"
+            state.isOpen.set(true)
             TreeViewWatchItem.load(TreeViewWatchItem("")).then (i) ->
               state.items.push(i)
         })
