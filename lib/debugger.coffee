@@ -341,7 +341,9 @@ class Debugger extends EventEmitter
     @client.once 'ready', @bindEvents
 
     @client.on 'unhandledResponse', (res) => @emit 'unhandledResponse', res
-    @client.on 'break', (res) => @onBreakEvent.broadcast(res.body); @emit 'break', res.body
+    @client.on 'break', (res) =>
+      @client.currentFrame = 0
+      @onBreakEvent.broadcast(res.body); @emit 'break', res.body
     @client.on 'exception', (res) => @emit 'exception', res.body
     @client.on 'error', onConnectionError
     @client.on 'close', () -> logger.info 'client', 'client closed'
@@ -366,12 +368,7 @@ class Debugger extends EventEmitter
 
   eval: (text) ->
     new Promise (resolve, reject) =>
-      @client.req {
-        command: 'evaluate'
-        arguments: {
-          expression: text
-        }
-      }, (err, result) ->
+      @client.reqFrameEval text, @client.currentFrame, (err, result) ->
         return reject(err) if err
         return resolve(result)
 

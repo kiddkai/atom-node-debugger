@@ -29,7 +29,7 @@ openScript = (scriptId, script, line) ->
           searchAllPanes: true
         })
       else
-        return if not state.scriptId()?
+        return if not scriptId?
         atom.workspace.open("#{PROTOCOL}#{scriptId}", {
           initialColumn: 0
           initialLine: line
@@ -121,7 +121,7 @@ exports.create = (_debugger) ->
 
             TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)), handlers: handlers)
 
-    frame: (frame) ->
+    frame: (frame, index) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
       return TreeView(
           TreeViewUtils.createFileRefHeader frame.script.name, frame.line + 1
@@ -134,6 +134,7 @@ exports.create = (_debugger) ->
           handlers: {
               click: () ->
                 openScript(frame.script.id, frame.script.name, frame.line)
+                _debugger.client.currentFrame = index
                 eventEmitter.emit('frame-selected', frame)
           }
         )
@@ -148,6 +149,9 @@ exports.create = (_debugger) ->
       log "Debugger.break"
       TreeView.reset(state)
       eventEmitter.emit('frame-selected', null)
+    listeners.push eventEmitter.subscribe 'frame-selected', () ->
+      state.items.forEach((item,index) -> if index isnt _debugger.client.currentFrame then item.isOpen.set(false));
+
     return state
 
   CallStackPane.render = (state) ->
@@ -187,7 +191,6 @@ exports.create = (_debugger) ->
     state = builder2.root()
     refresh = () -> TreeView.populate(state)
     listeners.push eventEmitter.subscribe 'frame-selected', (frame) ->
-      log "Frame selected"
       builder2.selectedFrame = frame
       refresh()
     return state
@@ -299,6 +302,7 @@ exports.create = (_debugger) ->
     state = builder3.root()
     refresh = () -> TreeView.populate(state)
     listeners.push _debugger.onBreak () -> refresh()
+    listeners.push eventEmitter.subscribe 'frame-selected', (frame) -> refresh()
     return state
 
   WatchPane.render = (state) ->
