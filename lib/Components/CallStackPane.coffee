@@ -2,7 +2,6 @@ Promise = require 'bluebird'
 {TreeView, TreeViewItem, TreeViewUtils} = require './TreeView'
 hg = require 'mercury'
 fs = require 'fs'
-{EventEmitter} = require '../eventing'
 {h} = hg
 FocusHook = require('./focus-hook');
 
@@ -38,8 +37,6 @@ openScript = (scriptId, script, line) ->
         })
 
 exports.create = (_debugger) ->
-
-  eventEmitter = new EventEmitter()
 
   builder =
     loadProperties: (ref) ->
@@ -134,8 +131,7 @@ exports.create = (_debugger) ->
           handlers: {
               click: () ->
                 openScript(frame.script.id, frame.script.name, frame.line)
-                _debugger.client.currentFrame = index
-                eventEmitter.emit('frame-selected', frame)
+                _debugger.setSelectedFrame frame, index
           }
         )
 
@@ -148,9 +144,8 @@ exports.create = (_debugger) ->
     listeners.push _debugger.onBreak () ->
       log "Debugger.break"
       TreeView.reset(state)
-      eventEmitter.emit('frame-selected', null)
-    listeners.push eventEmitter.subscribe 'frame-selected', () ->
-      state.items.forEach((item,index) -> if index isnt _debugger.client.currentFrame then item.isOpen.set(false));
+    listeners.push _debugger.onSelectedFrame ({index}) ->
+      state.items.forEach((item,i) -> if i isnt index then item.isOpen.set(false));
 
     return state
 
@@ -190,7 +185,7 @@ exports.create = (_debugger) ->
   LocalsPane = () ->
     state = builder2.root()
     refresh = () -> TreeView.populate(state)
-    listeners.push eventEmitter.subscribe 'frame-selected', (frame) ->
+    listeners.push _debugger.onSelectedFrame ({frame}) ->
       builder2.selectedFrame = frame
       refresh()
     return state
@@ -302,7 +297,7 @@ exports.create = (_debugger) ->
     state = builder3.root()
     refresh = () -> TreeView.populate(state)
     listeners.push _debugger.onBreak () -> refresh()
-    listeners.push eventEmitter.subscribe 'frame-selected', (frame) -> refresh()
+    listeners.push _debugger.onSelectedFrame () -> refresh()
     return state
 
   WatchPane.render = (state) ->

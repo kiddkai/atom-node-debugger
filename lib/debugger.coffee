@@ -238,7 +238,16 @@ class Debugger extends EventEmitter
     @processManager = new ProcessManager(@atom)
     @processManager.on 'processCreated', @attachInternal
     @processManager.on 'processEnd', @cleanupInternal
+    @onSelectedFrameEvent = Event()
+    @onSelectedFrame = @onSelectedFrameEvent.listen
+    @selectedFrame = null
     jumpToBreakpoint(this)
+
+  getSelectedFrame: () => @selectedFrame
+  setSelectedFrame: (frame, index) =>
+      @selectedFrame = frame
+      @client.currentFrame = index or -1
+      @onSelectedFrameEvent.broadcast({frame, index})
 
   dispose: ->
     @breakpointManager.dispose() if @breakpointManager
@@ -342,8 +351,9 @@ class Debugger extends EventEmitter
 
     @client.on 'unhandledResponse', (res) => @emit 'unhandledResponse', res
     @client.on 'break', (res) =>
-      @client.currentFrame = 0
       @onBreakEvent.broadcast(res.body); @emit 'break', res.body
+      @setSelectedFrame(null)
+
     @client.on 'exception', (res) => @emit 'exception', res.body
     @client.on 'error', onConnectionError
     @client.on 'close', () -> logger.info 'client', 'client closed'
