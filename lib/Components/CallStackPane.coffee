@@ -2,7 +2,6 @@ Promise = require 'bluebird'
 {TreeView, TreeViewItem, TreeViewUtils} = require './TreeView'
 hg = require 'mercury'
 fs = require 'fs'
-{EventEmitter} = require '../eventing'
 {h} = hg
 FocusHook = require('./focus-hook');
 
@@ -29,7 +28,7 @@ openScript = (scriptId, script, line) ->
           searchAllPanes: true
         })
       else
-        return if not state.scriptId()?
+        return if not scriptId?
         atom.workspace.open("#{PROTOCOL}#{scriptId}", {
           initialColumn: 0
           initialLine: line
@@ -38,8 +37,6 @@ openScript = (scriptId, script, line) ->
         })
 
 exports.create = (_debugger) ->
-
-  eventEmitter = new EventEmitter()
 
   builder =
     loadProperties: (ref) ->
@@ -121,7 +118,7 @@ exports.create = (_debugger) ->
 
             TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)), handlers: handlers)
 
-    frame: (frame) ->
+    frame: (frame, index) ->
       log "builder.frame #{frame.script.name}, #{frame.script.line}"
       return TreeView(
           TreeViewUtils.createFileRefHeader frame.script.name, frame.line + 1
@@ -134,7 +131,7 @@ exports.create = (_debugger) ->
           handlers: {
               click: () ->
                 openScript(frame.script.id, frame.script.name, frame.line)
-                eventEmitter.emit('frame-selected', frame)
+                _debugger.setSelectedFrame frame, index
           }
         )
 
@@ -147,7 +144,9 @@ exports.create = (_debugger) ->
     listeners.push _debugger.onBreak () ->
       log "Debugger.break"
       TreeView.reset(state)
-      eventEmitter.emit('frame-selected', null)
+    listeners.push _debugger.onSelectedFrame ({index}) ->
+      state.items.forEach((item,i) -> if i isnt index then item.isOpen.set(false));
+
     return state
 
   CallStackPane.render = (state) ->
@@ -186,8 +185,7 @@ exports.create = (_debugger) ->
   LocalsPane = () ->
     state = builder2.root()
     refresh = () -> TreeView.populate(state)
-    listeners.push eventEmitter.subscribe 'frame-selected', (frame) ->
-      log "Frame selected"
+    listeners.push _debugger.onSelectedFrame ({frame}) ->
       builder2.selectedFrame = frame
       refresh()
     return state
@@ -291,6 +289,7 @@ exports.create = (_debugger) ->
       return TreeView(title, evalExpressions, isRoot:true, handlers: {
           customEvent: (state) ->
             log "TreeViewWatch custom event handler invoked"
+            state.isOpen.set(true)
             TreeViewWatchItem.load(TreeViewWatchItem("")).then (i) ->
               state.items.push(i)
         })
@@ -299,6 +298,7 @@ exports.create = (_debugger) ->
     state = builder3.root()
     refresh = () -> TreeView.populate(state)
     listeners.push _debugger.onBreak () -> refresh()
+    listeners.push _debugger.onSelectedFrame () -> refresh()
     return state
 
   WatchPane.render = (state) ->
