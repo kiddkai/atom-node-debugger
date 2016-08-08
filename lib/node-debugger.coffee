@@ -37,9 +37,9 @@ module.exports =
     @disposables = new CompositeDisposable()
     _debugger = new Debugger(atom)
     @disposables.add _debugger.subscribeDisposable 'connected', ->
-      atom.notifications.addSuccess('connected, enjoy debugging : )')
+      atom.notifications.addSuccess('Debugger Connected')
     @disposables.add _debugger.subscribeDisposable 'disconnected', ->
-      atom.notifications.addInfo('finish debugging : )')
+      atom.notifications.addInfo('Debugging Complete')
     @disposables.add atom.commands.add('atom-workspace', {
       'node-debugger:start-resume': @startOrResume
       'node-debugger:start-active-file': @startActiveFile
