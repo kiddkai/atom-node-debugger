@@ -101,8 +101,6 @@ exports.start = (root, _debugger) ->
           style: {
             display: 'flex'
             flex: 'auto'
-            width: "#{state.sideWidth/3}px"
-            flexBasis: "#{state.sideWidth/3}px"
             height: "#{state.height}px"
             flexDirection: 'column'
           }
@@ -118,8 +116,6 @@ exports.start = (root, _debugger) ->
           style: {
             display: 'flex'
             flex: 'auto'
-            width: "#{state.sideWidth/3}px"
-            flexBasis: "#{state.sideWidth/3}px"
             height: "#{state.height}px"
             flexDirection: 'column'
           }
@@ -135,8 +131,6 @@ exports.start = (root, _debugger) ->
           style: {
             display: 'flex'
             flex: 'auto'
-            width: "#{state.sideWidth/3}px"
-            flexBasis: "#{state.sideWidth/3}px"
             height: "#{state.height}px"
             flexDirection: 'column'
           }
@@ -152,8 +146,6 @@ exports.start = (root, _debugger) ->
           style: {
             display: 'flex'
             flex: 'auto'
-            width: "#{state.sideWidth/3}px"
-            flexBasis: "#{state.sideWidth/3}px"
             height: "#{state.height}px"
             flexDirection: 'column'
           }
