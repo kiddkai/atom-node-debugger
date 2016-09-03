@@ -168,33 +168,15 @@ exports.start = (root, _debugger) ->
         h('div', {
           style: {
             display: 'flex'
-            width: "#{state.sideWidth/3}px"
-            flexBasis: "#{state.sideWidth/3}px"
             height: "#{state.height}px"
-            flexDirection: 'row'
+            flexDirection: 'column'
           }
         }, [
-          h('div.inset-panel', {
-            style: {
-              flexDirection: 'row'
-              display: 'flex'
-              flex: 'auto'
-            }
-          }, [
-            h('div.debugger-panel-heading', {
-              style: {
-                'flex-shrink': 0
-              }
-            }, [
-              h('div.btn-group', {}, [
-                StepButton.render(state.steps.stepContinue)
-                StepButton.render(state.steps.stepNext)
-                StepButton.render(state.steps.stepIn)
-                StepButton.render(state.steps.stepOut)
-                cancelButton.render(state.cancel)
-              ])
-            ])
-          ])
+            StepButton.render(state.steps.stepContinue)
+            StepButton.render(state.steps.stepNext)
+            StepButton.render(state.steps.stepIn)
+            StepButton.render(state.steps.stepOut)
+            cancelButton.render(state.cancel)
         ])
       ])
     ])
