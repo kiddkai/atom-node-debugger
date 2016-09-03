@@ -12,70 +12,6 @@ logger = require '../logger'
 StepButton = null
 BreakPointPane = null
 
-LeftSidePane = (ConsolePane, state) ->
-  h('div', {
-    style: {
-      display: 'flex'
-      flex: 'auto'
-      flexDirection: 'column'
-    }
-  }, [
-    ConsolePane.render(state.logger)
-  ])
-
-RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state) ->
-  h('div', {
-    style: {
-      display: 'flex'
-      width: "#{state.sideWidth}px"
-      flexBasis: "#{state.sideWidth}px"
-      height: "#{state.height}px"
-      flexDirection: 'row'
-    }
-  }, [
-    h('div.resizer', {
-      style:
-        width: '5px'
-        flexBasis: '5px'
-        cursor: 'ew-resize'
-      'ev-mousedown': dragHandler state.channels.changeWidth, {}
-    })
-    h('div.inset-panel', {
-      style: {
-        flexDirection: 'column'
-        display: 'flex'
-        flex: 'auto'
-      }
-    }, [
-      h('div.debugger-panel-heading', {
-        style: {
-          'flex-shrink': 0
-        }
-      }, [
-        h('div.btn-group', {}, [
-          StepButton.render(state.steps.stepContinue)
-          StepButton.render(state.steps.stepNext)
-          StepButton.render(state.steps.stepIn)
-          StepButton.render(state.steps.stepOut)
-          cancelButton.render(state.cancel)
-        ])
-      ])
-      h('div.panel-body', {
-        style: {
-          flex: 'auto'
-          display: 'list-item'
-          overflow: 'auto';
-        }
-      }, [
-        BreakPointPane.render(state.breakpoints)
-        CallStackPane.render(state.callstack)
-        LocalsPane.render(state.locals)
-        WatchPane.render(state.watch)
-      ])
-    ])
-  ])
-
-
 exports.start = (root, _debugger) ->
   StepButton = stepButton.StepButton(_debugger)
   BreakPointPane = breakpointPanel.create(_debugger)
@@ -145,8 +81,121 @@ exports.start = (root, _debugger) ->
           flexDirection: 'row'
         }
       }, [
-        LeftSidePane(ConsolePane, state)
-        RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
+        h('div', {
+          style: {
+            display: 'flex'
+            flex: 'auto'
+            flexDirection: 'column'
+          }
+        }, [
+          ConsolePane.render(state.logger)
+        ])
+        h('div.resizer', {
+          style:
+            width: '5px'
+            flexBasis: '5px'
+            cursor: 'ew-resize'
+          'ev-mousedown': dragHandler state.channels.changeWidth, {}
+        })
+        h('div', {
+          style: {
+            display: 'flex'
+            flex: 'auto'
+            width: "#{state.sideWidth/3}px"
+            flexBasis: "#{state.sideWidth/3}px"
+            height: "#{state.height}px"
+            flexDirection: 'column'
+          }
+        }, [
+            BreakPointPane.render(state.breakpoints)
+        ])
+        h('div.resizer', {
+          style:
+            width: '5px'
+            flexBasis: '5px'
+        })
+        h('div', {
+          style: {
+            display: 'flex'
+            flex: 'auto'
+            width: "#{state.sideWidth/3}px"
+            flexBasis: "#{state.sideWidth/3}px"
+            height: "#{state.height}px"
+            flexDirection: 'column'
+          }
+        }, [
+            CallStackPane.render(state.callstack)
+        ])
+        h('div.resizer', {
+          style:
+            width: '5px'
+            flexBasis: '5px'
+        })
+        h('div', {
+          style: {
+            display: 'flex'
+            flex: 'auto'
+            width: "#{state.sideWidth/3}px"
+            flexBasis: "#{state.sideWidth/3}px"
+            height: "#{state.height}px"
+            flexDirection: 'column'
+          }
+        }, [
+              LocalsPane.render(state.locals)
+        ])
+        h('div.resizer', {
+          style:
+            width: '5px'
+            flexBasis: '5px'
+        })
+        h('div', {
+          style: {
+            display: 'flex'
+            flex: 'auto'
+            width: "#{state.sideWidth/3}px"
+            flexBasis: "#{state.sideWidth/3}px"
+            height: "#{state.height}px"
+            flexDirection: 'column'
+          }
+        }, [
+              WatchPane.render(state.watch)
+        ])
+        h('div.resizer', {
+          style:
+            width: '5px'
+            flexBasis: '5px'
+        })
+        h('div', {
+          style: {
+            display: 'flex'
+            width: "#{state.sideWidth/3}px"
+            flexBasis: "#{state.sideWidth/3}px"
+            height: "#{state.height}px"
+            flexDirection: 'row'
+          }
+        }, [
+          h('div.inset-panel', {
+            style: {
+              flexDirection: 'row'
+              display: 'flex'
+              flex: 'auto'
+            }
+          }, [
+            h('div.debugger-panel-heading', {
+              style: {
+                'flex-shrink': 0
+              }
+            }, [
+              h('div.btn-group', {}, [
+                StepButton.render(state.steps.stepContinue)
+                StepButton.render(state.steps.stepNext)
+                StepButton.render(state.steps.stepIn)
+                StepButton.render(state.steps.stepOut)
+                cancelButton.render(state.cancel)
+              ])
+            ])
+          ])
+        ])
       ])
     ])
 
