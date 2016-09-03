@@ -80,9 +80,18 @@ TreeView.defaultRender = (state) ->
         h('ul.entries.list-tree', {}, state.items.map(TreeView.render))
       ])
 
-  result = h('div.debugger-vertical-pane.inset-panel', {}, [
-      h('ul.list-tree.has-collapsable-children', {}, [result])
-    ]) if state.isRoot
+  if state.isRoot
+    result =
+      h('div.debugger-vertical-pane', {
+        style:
+          transform: 'rotate(90deg)' unless state.isOpen
+      }, [
+        h('ul.list-tree.has-collapsable-children', {
+          }, [
+            result
+          ])
+      ])
+
   return result
 
 TreeViewItem = (value, { handlers } = {}) -> hg.state({

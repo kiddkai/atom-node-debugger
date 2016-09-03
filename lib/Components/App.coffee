@@ -100,9 +100,10 @@ exports.start = (root, _debugger) ->
         h('div', {
           style: {
             display: 'flex'
-            flex: 'auto'
             height: "#{state.height}px"
             flexDirection: 'column'
+            flex: '0 1 auto'
+            width: '25px' unless state.breakpoints.isOpen
           }
         }, [
             BreakPointPane.render(state.breakpoints)
@@ -118,6 +119,8 @@ exports.start = (root, _debugger) ->
             flex: 'auto'
             height: "#{state.height}px"
             flexDirection: 'column'
+            flex: '0 1 auto'
+            width: '25px' unless state.callstack.isOpen
           }
         }, [
             CallStackPane.render(state.callstack)
@@ -133,6 +136,8 @@ exports.start = (root, _debugger) ->
             flex: 'auto'
             height: "#{state.height}px"
             flexDirection: 'column'
+            flex: '0 1 auto'
+            width: '25px' unless state.locals.isOpen
           }
         }, [
               LocalsPane.render(state.locals)
@@ -148,6 +153,8 @@ exports.start = (root, _debugger) ->
             flex: 'auto'
             height: "#{state.height}px"
             flexDirection: 'column'
+            flex: '0 1 auto'
+            width: '25px' unless state.watch.isOpen
           }
         }, [
               WatchPane.render(state.watch)
@@ -162,6 +169,7 @@ exports.start = (root, _debugger) ->
             display: 'flex'
             height: "#{state.height}px"
             flexDirection: 'column'
+            flex: '0 1 auto'
           }
         }, [
             StepButton.render(state.steps.stepContinue)
