@@ -122,6 +122,7 @@ exports.create = (_debugger) ->
             style: { 'margin-left': 'auto' },
             className: 'icon-trashcan btn btn-primary'
             'ev-click': hg.send state.channels.clear
+            'title': 'clear console'
           })
         ])
       h('div.panel-body.padded.native-key-bindings', {
