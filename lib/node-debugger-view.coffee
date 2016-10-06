@@ -11,6 +11,7 @@ exports.show = (_debugger) ->
   if not isInited
     $rootBottom = document.createElement('div')
     $rootRight = document.createElement('div')
+    $rootRight.style = "display:flex" # had to set flex here to get the splitter to fill the vertical space
     App.startBottom($rootBottom, _debugger)
     App.startRight($rootRight, _debugger)
 

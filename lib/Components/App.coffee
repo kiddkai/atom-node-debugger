@@ -27,19 +27,13 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
   h('div', {
     style: {
       display: 'flex'
+      flex: 1
       width: "#{state.sideWidth}px"
       flexBasis: "#{state.sideWidth}px"
       height: "#{state.height}px"
       flexDirection: 'row'
     }
   }, [
-    h('div.resizer', {
-      style:
-        width: '5px'
-        flexBasis: '5px'
-        cursor: 'ew-resize'
-      'ev-mousedown': dragHandler state.channels.changeWidth, {}
-    })
     h('div.inset-panel', {
       style: {
         flexDirection: 'column'
@@ -156,7 +150,21 @@ exports.startRight = (root, _debugger) ->
     hg.state(define)
 
   App.render = (state) ->
-    h('div', {}, [RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)])
+    h('div', {
+      style: {
+        display: 'flex'
+        flexDirection: 'row'
+        'justify-content': 'center'
+      }
+    }, [
+      h('div.resizer', {
+        style:
+          width: '5px'
+          cursor: 'ew-resize'
+        'ev-mousedown': dragHandler state.channels.changeWidth, {}
+      })
+      RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
+    ])
 
   hg.app(root, App(), App.render)
 
