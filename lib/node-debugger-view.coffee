@@ -1,25 +1,33 @@
 App = require './Components/App'
 
-$root = null
-$panel = null
+$rootBottom = null
+$rootRight = null
+$panelBottom = null
+$panelRight = null
 isInited = false
+$panel2 = null
 
 exports.show = (_debugger) ->
   if not isInited
-    $root = document.createElement('div')
-    App.start($root, _debugger)
+    $rootBottom = document.createElement('div')
+    $rootRight = document.createElement('div')
+    App.startBottom($rootBottom, _debugger)
+    App.startRight($rootRight, _debugger)
 
-  $panel = atom.workspace.addBottomPanel(item: $root)
+  $panelBottom = atom.workspace.addBottomPanel(item: $rootBottom)
+  $panelRight = atom.workspace.addRightPanel(item: $rootRight)
   isInited = true
 
 exports.hide = ->
-  return unless $panel
-  $panel.destroy()
+  $panelBottom.destroy() if $panelBottom
+  $panelRight.destroy() if $panelRight
   atom.workspace.getActivePane().activate()
 
 exports.destroy = ->
   exports.hide()
   App.stop()
   isInited = false
-  $root.remove() if $root?
-  $root = null
+  $rootBottom.remove() if $rootBottom?
+  $rootRight.remove() if $rootRight?
+  $rootBottom = null
+  $rootRight = null
