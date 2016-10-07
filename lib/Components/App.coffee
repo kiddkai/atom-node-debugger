@@ -27,19 +27,13 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
   h('div', {
     style: {
       display: 'flex'
+      flex: 1
       width: "#{state.sideWidth}px"
       flexBasis: "#{state.sideWidth}px"
       height: "#{state.height}px"
       flexDirection: 'row'
     }
   }, [
-    h('div.resizer', {
-      style:
-        width: '5px'
-        flexBasis: '5px'
-        cursor: 'ew-resize'
-      'ev-mousedown': dragHandler state.channels.changeWidth, {}
-    })
     h('div.inset-panel', {
       style: {
         flexDirection: 'column'
@@ -75,53 +69,23 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
     ])
   ])
 
-
-exports.start = (root, _debugger) ->
-  StepButton = stepButton.StepButton(_debugger)
-  BreakPointPane = breakpointPanel.create(_debugger)
-  {CallStackPane, LocalsPane, WatchPane} = callstackPaneModule.create(_debugger)
+exports.startBottom = (root, _debugger) ->
   ConsolePane = consolePane.create(_debugger)
 
   changeHeight = (state, data) ->
     state.height.set(data.height)
 
-  changeWidth = (state, data) ->
-    state.sideWidth.set(data.sideWidth)
-
   App = ->
-    stepContinue = StepButton('continue', 'continue')
-    stepIn = StepButton('step in', 'in')
-    stepOut = StepButton('step out', 'out')
-    stepNext = StepButton('step next', 'next')
-
     define = {
       height: hg.value 350
-      sideWidth: hg.value 400
       channels: {
         changeHeight: changeHeight
-        changeWidth: changeWidth
       }
-      steps: {
-        stepIn: stepIn
-        stepOut: stepOut
-        stepNext: stepNext
-        stepContinue: stepContinue
-      }
-      breakpoints: BreakPointPane()
-      callstack: CallStackPane()
-      watch: WatchPane()
-      locals: LocalsPane()
       logger: ConsolePane()
-      cancel: cancelButton.create(_debugger)
     }
-
-    logger.info 'app init', define
-
     hg.state(define)
 
   App.render = (state) ->
-    logger.info 'app state', state
-
     h('div', {
       style: {
         display: 'flex'
@@ -146,8 +110,60 @@ exports.start = (root, _debugger) ->
         }
       }, [
         LeftSidePane(ConsolePane, state)
-        RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
       ])
+    ])
+
+  hg.app(root, App(), App.render)
+
+exports.startRight = (root, _debugger) ->
+  StepButton = stepButton.StepButton(_debugger)
+  BreakPointPane = breakpointPanel.create(_debugger)
+  {CallStackPane, LocalsPane, WatchPane} = callstackPaneModule.create(_debugger)
+  ConsolePane = consolePane.create(_debugger)
+
+  changeWidth = (state, data) ->
+    state.sideWidth.set(data.sideWidth)
+
+  App = ->
+    stepContinue = StepButton('continue', 'continue')
+    stepIn = StepButton('step in', 'in')
+    stepOut = StepButton('step out', 'out')
+    stepNext = StepButton('step next', 'next')
+
+    define = {
+      sideWidth: hg.value 400
+      channels: {
+        changeWidth: changeWidth
+      }
+      steps: {
+        stepIn: stepIn
+        stepOut: stepOut
+        stepNext: stepNext
+        stepContinue: stepContinue
+      }
+      breakpoints: BreakPointPane()
+      callstack: CallStackPane()
+      watch: WatchPane()
+      locals: LocalsPane()
+      cancel: cancelButton.create(_debugger)
+    }
+    hg.state(define)
+
+  App.render = (state) ->
+    h('div', {
+      style: {
+        display: 'flex'
+        flexDirection: 'row'
+        'justify-content': 'center'
+      }
+    }, [
+      h('div.resizer', {
+        style:
+          width: '5px'
+          cursor: 'ew-resize'
+        'ev-mousedown': dragHandler state.channels.changeWidth, {}
+      })
+      RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
     ])
 
   hg.app(root, App(), App.render)
