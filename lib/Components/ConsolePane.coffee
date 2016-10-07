@@ -114,6 +114,7 @@ exports.create = (_debugger) ->
             flexDirection: 'row'
             'align-items': 'center'
             'justify-content': 'center'
+            flex: '0 0 auto'
           }
         }
         [
