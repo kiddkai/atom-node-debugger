@@ -112,9 +112,15 @@ exports.create = (_debugger) ->
                     title
                   else
                     if isArray
-                      "#{title} [ #{len} ]"
+                      h('span', {}, [
+                        "#{title} [ #{len} ]"
+                        h('span.subtle-text', {}, " ##{ref}")
+                      ])
                     else
-                      "#{title} { ... }"
+                      h('span', {}, [
+                        "#{title} { ... }"
+                        h('span.subtle-text', {}, " ##{ref}")
+                      ])
 
             TreeView(decorate("#{name} : #{className}"), (() => builder.loadProperties(ref).map(builder.property)), handlers: handlers)
 
