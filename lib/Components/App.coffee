@@ -75,11 +75,17 @@ exports.startBottom = (root, _debugger) ->
   changeHeight = (state, data) ->
     state.height.set(data.height)
 
+  toggleCollapsed = (state, data) ->
+    console.log("toggle " + state.collapsed())
+    state.collapsed.set(!state.collapsed())
+
   App = ->
     define = {
       height: hg.value 350
+      collapsed: hg.value false
       channels: {
         changeHeight: changeHeight
+        toggleCollapsed: toggleCollapsed
       }
       logger: ConsolePane()
     }
@@ -92,16 +98,28 @@ exports.startBottom = (root, _debugger) ->
         flex: 'auto'
         flexDirection: 'column'
         position: 'relative'
-        height: "#{state.height}px"
+        height: "#{if state.collapsed then 10 else state.height}px"
       }
     }, [
       h('div.resizer', {
         style:
-          height: '5px'
-          cursor: 'ns-resize'
-          flex: '0 0 auto' # avoid collapse of resizer (size it is an empty div it seems to easily collapse into nothing preveting the user to resize)
+          cursor: if state.collapsed then '' else 'ns-resize'
+          display: 'flex'
+          'flex-direction': 'column'
         'ev-mousedown': dragHandler state.channels.changeHeight, {}
-      })
+      }, [
+        h('div', {
+            style: {
+              'align-self': 'center'
+              cursor: 'pointer'
+              'margin-top': '-4px'
+              'margin-bottom':'-2px'
+            }
+            'ev-click': hg.send state.channels.toggleCollapsed
+            className: if state.collapsed then 'icon-triangle-up' else 'icon-triangle-down'
+          }, [
+        ])
+      ])
       h('div', {
         style: {
           display: 'flex'
@@ -123,6 +141,8 @@ exports.startRight = (root, _debugger) ->
 
   changeWidth = (state, data) ->
     state.sideWidth.set(data.sideWidth)
+
+  toggleCollapsed = (state, data) ->
 
   App = ->
     stepContinue = StepButton('continue', 'continue')
