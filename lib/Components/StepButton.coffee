@@ -8,6 +8,13 @@ BTN_ICON_MAP = {
   'in': 'icon-chevron-down btn btn-primary'
 }
 
+BTN_TOOLTIP_MAP = {
+  'continue': 'resume'
+  'next': 'step-next'
+  'in': 'step-in'
+  'out': 'step-out'
+}
+
 exports.StepButton = (_debugger) ->
   onNext = (state) ->
     type = state.type()
@@ -41,6 +48,7 @@ exports.StepButton = (_debugger) ->
       'ev-click': hg.send channels.next
       'className': BTN_ICON_MAP[state.type()]
       'disabled': !state.waiting
+      'title': BTN_TOOLTIP_MAP[state.type()]
     }, [
     ]
 
