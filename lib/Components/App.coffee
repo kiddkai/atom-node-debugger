@@ -28,9 +28,7 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
     style: {
       display: 'flex'
       flex: 1
-      width: "#{state.sideWidth}px"
-      flexBasis: "#{state.sideWidth}px"
-      height: "#{state.height}px"
+      width: "#{if state.collapsed then 5 else state.sideWidth}px"
       flexDirection: 'row'
     }
   }, [
@@ -76,7 +74,6 @@ exports.startBottom = (root, _debugger) ->
     state.height.set(data.height)
 
   toggleCollapsed = (state, data) ->
-    console.log("toggle " + state.collapsed())
     state.collapsed.set(!state.collapsed())
 
   App = ->
@@ -106,7 +103,7 @@ exports.startBottom = (root, _debugger) ->
           cursor: if state.collapsed then '' else 'ns-resize'
           display: 'flex'
           'flex-direction': 'column'
-        'ev-mousedown': dragHandler state.channels.changeHeight, {}
+        'ev-mousedown': unless state.collapsed then dragHandler state.channels.changeHeight, {}
       }, [
         h('div', {
             style: {
@@ -143,6 +140,7 @@ exports.startRight = (root, _debugger) ->
     state.sideWidth.set(data.sideWidth)
 
   toggleCollapsed = (state, data) ->
+    state.collapsed.set(!state.collapsed())
 
   App = ->
     stepContinue = StepButton('continue', 'continue')
@@ -152,8 +150,10 @@ exports.startRight = (root, _debugger) ->
 
     define = {
       sideWidth: hg.value 400
+      collapsed: hg.value false
       channels: {
         changeWidth: changeWidth
+        toggleCollapsed: toggleCollapsed
       }
       steps: {
         stepIn: stepIn
@@ -179,10 +179,22 @@ exports.startRight = (root, _debugger) ->
     }, [
       h('div.resizer', {
         style:
-          width: '5px'
-          cursor: 'ew-resize'
-        'ev-mousedown': dragHandler state.channels.changeWidth, {}
-      })
+          display: 'flex'
+          cursor: if state.collapsed then '' else 'ew-resize'
+        'ev-mousedown': unless state.collapsed then dragHandler state.channels.changeWidth, {}
+      }, [
+        h('div', {
+            style: {
+              'align-self': 'center'
+              cursor: 'pointer'
+              'margin-left': '0px'
+              'margin-right':'-4px'
+            }
+            'ev-click': hg.send state.channels.toggleCollapsed
+            className: if state.collapsed then 'icon-triangle-left' else 'icon-triangle-right'
+          }, [
+        ])
+      ])
       RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
     ])
 
