@@ -28,7 +28,7 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
     style: {
       display: 'flex'
       flex: 1
-      width: "#{if state.collapsed then 5 else state.sideWidth}px"
+      width: "#{if state.collapsed then 0 else state.sideWidth}px"
       flexDirection: 'row'
     }
   }, [
