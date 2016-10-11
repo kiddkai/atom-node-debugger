@@ -15,3 +15,4 @@
   'f10': 'node-debugger:step-next'
   'f11': 'node-debugger:step-in'
   'shift-f11': 'node-debugger:step-out'
+  'f12': 'node-debugger:toggle-debugger'
