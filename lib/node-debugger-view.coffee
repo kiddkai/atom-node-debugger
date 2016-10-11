@@ -12,8 +12,8 @@ exports.show = (_debugger) ->
     $rootBottom = document.createElement('div')
     $rootRight = document.createElement('div')
     $rootRight.style = "display:flex" # had to set flex here to get the splitter to fill the vertical space
-    appBottom = App.startBottom($rootBottom, _debugger)
-    appRightSide = App.startRight($rootRight, _debugger)
+    App.startBottom($rootBottom, _debugger)
+    App.startRight($rootRight, _debugger)
 
   $panelBottom = atom.workspace.addBottomPanel(item: $rootBottom)
   $panelRight = atom.workspace.addRightPanel(item: $rootRight)
