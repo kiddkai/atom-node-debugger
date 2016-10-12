@@ -395,5 +395,8 @@ class Debugger extends EventEmitter
   isConnected: =>
       return @client?
 
+  toggle: =>
+    NodeDebuggerView.toggle(this)
+
 exports.Debugger = Debugger
 exports.ProcessManager = ProcessManager
