@@ -250,7 +250,7 @@ exports.create = (_debugger) ->
     ESCAPE = 27
     content =
       if state.editMode
-        input = h("input.form-control.input-sm.native-key-bindings", {
+        input = h("input.watch-input-box.input-sm.native-key-bindings", {
             value: state.expression
             name: "expression"
             placeholder: "clear content to delete slot" if state.expression is ""
