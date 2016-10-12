@@ -128,7 +128,9 @@ exports.startBottom = (root, _debugger) ->
       ])
     ])
 
-  hg.app(root, App(), App.render)
+  app = App()
+  hg.app(root, app, App.render)
+  app
 
 exports.startRight = (root, _debugger) ->
   StepButton = stepButton.StepButton(_debugger)
@@ -198,8 +200,10 @@ exports.startRight = (root, _debugger) ->
       RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
     ])
 
-  hg.app(root, App(), App.render)
-
+  app = App()
+  hg.app(root, app, App.render)
+  app
+  
 exports.stop = ->
   BreakPointPane.cleanup()
   callstackPaneModule.cleanup()
