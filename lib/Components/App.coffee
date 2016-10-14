@@ -4,13 +4,14 @@ h = hg.h
 stepButton = require './StepButton'
 breakpointPanel = require './BreakPointPane'
 callstackPaneModule = require './CallStackPane'
-consolePane = require './ConsolePane'
+consolePaneModule = require './ConsolePane'
 cancelButton = require './CancelButton'
 dragHandler = require './drag-handler'
 logger = require '../logger'
 
 StepButton = null
 BreakPointPane = null
+ConsolePane = null
 
 LeftSidePane = (ConsolePane, state) ->
   h('div', {
@@ -68,7 +69,7 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
   ])
 
 exports.startBottom = (root, _debugger) ->
-  ConsolePane = consolePane.create(_debugger)
+  ConsolePane = consolePaneModule.create(_debugger)
 
   changeHeight = (state, data) ->
     state.height.set(data.height)
@@ -136,7 +137,6 @@ exports.startRight = (root, _debugger) ->
   StepButton = stepButton.StepButton(_debugger)
   BreakPointPane = breakpointPanel.create(_debugger)
   {CallStackPane, LocalsPane, WatchPane} = callstackPaneModule.create(_debugger)
-  ConsolePane = consolePane.create(_debugger)
 
   changeWidth = (state, data) ->
     state.sideWidth.set(data.sideWidth)
@@ -203,7 +203,8 @@ exports.startRight = (root, _debugger) ->
   app = App()
   hg.app(root, app, App.render)
   app
-  
+
 exports.stop = ->
   BreakPointPane.cleanup()
   callstackPaneModule.cleanup()
+  ConsolePane.cleanup()
