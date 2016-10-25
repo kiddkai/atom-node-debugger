@@ -49,6 +49,7 @@ module.exports =
       'node-debugger:step-in': @stepIn
       'node-debugger:step-out': @stepOut
       'node-debugger:attach': @attach
+      'node-debugger:toggle-debugger': @toggleDebugger
     })
 
   startOrResume: =>
@@ -88,3 +89,6 @@ module.exports =
     @stop()
     @disposables.dispose()
     _debugger.dispose()
+
+  toggleDebugger: ->
+    _debugger.toggle()

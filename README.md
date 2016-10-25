@@ -23,13 +23,14 @@ You may access the commands using CMD/Ctrl+p or by using the shortcut key specif
 
 ```js
 'node-debugger:start-resume' (F5)
-'node-debugger:debug-active-file' (ctrl-F5)
+'node-debugger:start-active-file' (ctrl-F5)
 'node-debugger:stop' (shift-F5)
 'node-debugger:toggle-breakpoint' (F9)
 'node-debugger:step-next' (F10)
 'node-debugger:step-in' (F11)
 'node-debugger:step-out' (shift-F11)
 'node-debugger:attach'
+'node-debugger:toggle-debugger' (F12)
 ```
 
 ## Configuration

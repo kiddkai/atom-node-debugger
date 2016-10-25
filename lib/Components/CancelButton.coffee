@@ -15,4 +15,5 @@ exports.create = (_debugger) ->
 exports.render = (state) ->
   h('button.btn.btn-error.icon-primitive-square', {
     'ev-click': hg.send state.channels.cancel
+    'title': 'stop debugging'
   }, [])

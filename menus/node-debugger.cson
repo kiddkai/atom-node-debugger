@@ -35,6 +35,10 @@
         {
           'label': 'Toggle Breakpoint'
           'command': 'node-debugger:toggle-breakpoint'
+        },
+        {
+          'label': 'Toggle Debugger'
+          'command': 'node-debugger:toggle-debugger'
         }
       ]
     ]

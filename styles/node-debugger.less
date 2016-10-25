@@ -33,6 +33,20 @@
 .debugger-vertical-pane {
 }
 
+.subtle-text {
+  color: @text-color-subtle;
+  font-size: @font-size * 0.8;
+}
+
+.watch-input-box {
+  width: 96%;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  background-color: @input-background-color;
+  border: 0;
+  height: 22px;
+}
+
 atom-text-editor::shadow {
   .gutter .line-number {
       &.node-debugger-stop-line:before {

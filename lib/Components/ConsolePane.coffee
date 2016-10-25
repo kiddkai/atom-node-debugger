@@ -62,7 +62,7 @@ exports.create = (_debugger) ->
 
   input = new ConsoleInput(_debugger)
 
-  ConsolePane = () ->
+  ConsolePane = () =>
     state = hg.state({
       lines: hg.array([])
       channels: {
@@ -80,11 +80,12 @@ exports.create = (_debugger) ->
           next()
       })
 
-    _debugger.processManager.on 'processCreated', ->
+    self = this
+    self.unsubscribeProcessCreated = _debugger.processManager.subscribe 'processCreated', ->
       {stdout, stderr} = _debugger.processManager.process
 
-      stdout.on 'data', (d) -> console.log(d.toString())
-      stderr.on 'data', (d) -> console.log(d.toString())
+      self.unsubscribeLogData = stdout.subscribe 'data', (d) -> console.log(d.toString())
+      self.unsubscribeLogError = stderr.subscribe 'data', (d) -> console.log(d.toString())
 
       stdout
         .pipe(split())
@@ -94,7 +95,7 @@ exports.create = (_debugger) ->
         .pipe(split())
         .pipe(newWriter())
 
-    _debugger.on 'reconnect', ({count,host,port,timeout}) ->
+    self.unsubscribeReconnect = _debugger.subscribe 'reconnect', ({count,host,port,timeout}) ->
       message = "Connection attempt #{count} to node process on #{host}:#{port} failed. Will try again in #{timeout}."
       state.lines.push(message)
 
@@ -114,6 +115,7 @@ exports.create = (_debugger) ->
             flexDirection: 'row'
             'align-items': 'center'
             'justify-content': 'center'
+            flex: '0 0 auto'
           }
         }
         [
@@ -122,6 +124,7 @@ exports.create = (_debugger) ->
             style: { 'margin-left': 'auto' },
             className: 'icon-trashcan btn btn-primary'
             'ev-click': hg.send state.channels.clear
+            'title': 'clear console'
           })
         ])
       h('div.panel-body.padded.native-key-bindings', {
@@ -142,6 +145,14 @@ exports.create = (_debugger) ->
       ])
     ])
 
-  return ConsolePane
+  ConsolePane.cleanup = () =>
+    @unsubscribeProcessCreated() if @unsubscribeProcessCreated
+    @unsubscribeLogData() if @unsubscribeLogData
+    @unsubscribeLogError() if @unsubscribeLogError
+    @unsubscribeReconnect() if @unsubscribeReconnect
+    @unsubscribeProcessCreated = null
+    @unsubscribeLogData = null
+    @unsubscribeLogError = null
+    @unsubscribeReconnect = null
 
-exports.cleanup = () ->
+  return ConsolePane

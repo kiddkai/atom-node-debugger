@@ -4,13 +4,14 @@ h = hg.h
 stepButton = require './StepButton'
 breakpointPanel = require './BreakPointPane'
 callstackPaneModule = require './CallStackPane'
-consolePane = require './ConsolePane'
+consolePaneModule = require './ConsolePane'
 cancelButton = require './CancelButton'
 dragHandler = require './drag-handler'
 logger = require '../logger'
 
 StepButton = null
 BreakPointPane = null
+ConsolePane = null
 
 LeftSidePane = (ConsolePane, state) ->
   h('div', {
@@ -27,19 +28,11 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
   h('div', {
     style: {
       display: 'flex'
-      width: "#{state.sideWidth}px"
-      flexBasis: "#{state.sideWidth}px"
-      height: "#{state.height}px"
+      flex: 1
+      width: "#{if state.collapsed then 0 else state.sideWidth}px"
       flexDirection: 'row'
     }
   }, [
-    h('div.resizer', {
-      style:
-        width: '5px'
-        flexBasis: '5px'
-        cursor: 'ew-resize'
-      'ev-mousedown': dragHandler state.channels.changeWidth, {}
-    })
     h('div.inset-panel', {
       style: {
         flexDirection: 'column'
@@ -75,18 +68,81 @@ RightSidePane = (BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButto
     ])
   ])
 
-
-exports.start = (root, _debugger) ->
-  StepButton = stepButton.StepButton(_debugger)
-  BreakPointPane = breakpointPanel.create(_debugger)
-  {CallStackPane, LocalsPane, WatchPane} = callstackPaneModule.create(_debugger)
-  ConsolePane = consolePane.create(_debugger)
+exports.startBottom = (root, _debugger) ->
+  ConsolePane = consolePaneModule.create(_debugger)
 
   changeHeight = (state, data) ->
     state.height.set(data.height)
 
+  toggleCollapsed = (state, data) ->
+    state.collapsed.set(!state.collapsed())
+
+  App = ->
+    define = {
+      height: hg.value 350
+      collapsed: hg.value false
+      channels: {
+        changeHeight: changeHeight
+        toggleCollapsed: toggleCollapsed
+      }
+      logger: ConsolePane()
+    }
+    hg.state(define)
+
+  App.render = (state) ->
+    h('div', {
+      style: {
+        display: 'flex'
+        flex: 'auto'
+        flexDirection: 'column'
+        position: 'relative'
+        height: "#{if state.collapsed then 10 else state.height}px"
+      }
+    }, [
+      h('div.resizer', {
+        style:
+          cursor: if state.collapsed then '' else 'ns-resize'
+          display: 'flex'
+          'flex-direction': 'column'
+        'ev-mousedown': unless state.collapsed then dragHandler state.channels.changeHeight, {}
+      }, [
+        h('div', {
+            style: {
+              'align-self': 'center'
+              cursor: 'pointer'
+              'margin-top': '-4px'
+              'margin-bottom':'-2px'
+            }
+            'ev-click': hg.send state.channels.toggleCollapsed
+            className: if state.collapsed then 'icon-triangle-up' else 'icon-triangle-down'
+          }, [
+        ])
+      ])
+      h('div', {
+        style: {
+          display: 'flex'
+          flex: 'auto'
+          flexDirection: 'row'
+        }
+      }, [
+        LeftSidePane(ConsolePane, state)
+      ])
+    ])
+
+  app = App()
+  hg.app(root, app, App.render)
+  app
+
+exports.startRight = (root, _debugger) ->
+  StepButton = stepButton.StepButton(_debugger)
+  BreakPointPane = breakpointPanel.create(_debugger)
+  {CallStackPane, LocalsPane, WatchPane} = callstackPaneModule.create(_debugger)
+
   changeWidth = (state, data) ->
     state.sideWidth.set(data.sideWidth)
+
+  toggleCollapsed = (state, data) ->
+    state.collapsed.set(!state.collapsed())
 
   App = ->
     stepContinue = StepButton('continue', 'continue')
@@ -95,11 +151,11 @@ exports.start = (root, _debugger) ->
     stepNext = StepButton('step next', 'next')
 
     define = {
-      height: hg.value 350
       sideWidth: hg.value 400
+      collapsed: hg.value false
       channels: {
-        changeHeight: changeHeight
         changeWidth: changeWidth
+        toggleCollapsed: toggleCollapsed
       }
       steps: {
         stepIn: stepIn
@@ -111,47 +167,44 @@ exports.start = (root, _debugger) ->
       callstack: CallStackPane()
       watch: WatchPane()
       locals: LocalsPane()
-      logger: ConsolePane()
       cancel: cancelButton.create(_debugger)
     }
-
-    logger.info 'app init', define
-
     hg.state(define)
 
   App.render = (state) ->
-    logger.info 'app state', state
-
     h('div', {
       style: {
         display: 'flex'
-        flex: 'auto'
-        flexDirection: 'column'
-        position: 'relative'
-        height: "#{state.height}px"
+        flexDirection: 'row'
+        'justify-content': 'center'
       }
     }, [
       h('div.resizer', {
         style:
-          height: '5px'
-          cursor: 'ns-resize'
-          flex: '0 0 auto' # avoid collapse of resizer (size it is an empty div it seems to easily collapse into nothing preveting the user to resize)
-        'ev-mousedown': dragHandler state.channels.changeHeight, {}
-      })
-      h('div', {
-        style: {
           display: 'flex'
-          flex: 'auto'
-          flexDirection: 'row'
-        }
+          cursor: if state.collapsed then '' else 'ew-resize'
+        'ev-mousedown': unless state.collapsed then dragHandler state.channels.changeWidth, {}
       }, [
-        LeftSidePane(ConsolePane, state)
-        RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
+        h('div', {
+            style: {
+              'align-self': 'center'
+              cursor: 'pointer'
+              'margin-left': '0px'
+              'margin-right':'-4px'
+            }
+            'ev-click': hg.send state.channels.toggleCollapsed
+            className: if state.collapsed then 'icon-triangle-left' else 'icon-triangle-right'
+          }, [
+        ])
       ])
+      RightSidePane(BreakPointPane, CallStackPane, LocalsPane, WatchPane, StepButton, state)
     ])
 
-  hg.app(root, App(), App.render)
+  app = App()
+  hg.app(root, app, App.render)
+  app
 
 exports.stop = ->
   BreakPointPane.cleanup()
   callstackPaneModule.cleanup()
+  ConsolePane.cleanup()
