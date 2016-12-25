@@ -168,12 +168,10 @@ class BreakpointManager
       log "BreakpointManager.connected"
       @client = @debugger.client
       @attachBreakpoint(breakpoint) for breakpoint in @breakpoints
-      log "BreakpointManager.connected - done"
     @removeOnDisconnected = @debugger.subscribe 'disconnected', =>
       log "BreakpointManager.disconnected"
       @client = null
       breakpoint.clearId() for breakpoint in @breakpoints
-      log "BreakpointManager.disconnected - done"
     @onAddBreakpointEvent = Event()
     @onRemoveBreakpointEvent = Event()
 
