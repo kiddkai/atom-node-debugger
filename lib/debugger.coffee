@@ -11,7 +11,7 @@ fs = require 'fs'
 NodeDebuggerView = require './node-debugger-view'
 jumpToBreakpoint = require './jump-to-breakpoint'
 
-log = (msg) -> console.log(msg)
+log = (msg) -> #console.log(msg)
 
 class ProcessManager extends EventEmitter
   constructor: (@atom = atom)->
