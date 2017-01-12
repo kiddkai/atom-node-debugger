@@ -98,7 +98,8 @@ exports.create = (_debugger) ->
       switch(type)
         when 'string', 'boolean', 'number', 'undefined', 'null'
           value = value.value.value
-          TreeViewItem("#{name} : #{value}", handlers: handlers)
+          title = if type is 'string' then "#{name} : \"#{value}\"" else "#{name} : #{value}"
+          TreeViewItem(title, handlers: handlers)
         when 'function'
           TreeViewItem("#{name} : function() { ... }", handlers: handlers)
         when 'object'
