@@ -2,6 +2,7 @@
 {Debugger} = require './debugger'
 logger = require './logger'
 os = require 'os'
+fs = require 'fs'
 
 processManager = null
 _debugger = null
@@ -41,47 +42,49 @@ module.exports =
     @disposables.add _debugger.subscribeDisposable 'disconnected', ->
       #atom.notifications.addInfo('finish debugging : )')
     @disposables.add atom.commands.add('atom-workspace', {
-      'node-debugger:start-resume': @startOrResume
-      'node-debugger:start-active-file': @startActiveFile
-      'node-debugger:stop': @stop
-      'node-debugger:toggle-breakpoint': @toggleBreakpoint
-      'node-debugger:step-next': @stepNext
-      'node-debugger:step-in': @stepIn
-      'node-debugger:step-out': @stepOut
-      'node-debugger:attach': @attach
-      'node-debugger:toggle-debugger': @toggleDebugger
+      'node-debugger:start-resume': => @startOrResume()
+      'node-debugger:start-active-file': => @startActiveFile()
+      'node-debugger:stop': => @stop()
+      'node-debugger:toggle-breakpoint': => @toggleBreakpoint()
+      'node-debugger:step-next': => @stepNext()
+      'node-debugger:step-in': => @stepIn()
+      'node-debugger:step-out': => @stepOut()
+      'node-debugger:attach': => @attach()
+      'node-debugger:toggle-debugger': => @toggleDebugger()
     })
 
-  startOrResume: =>
+  startOrResume: ->
     if _debugger.isConnected()
       _debugger.reqContinue()
     else
+      @saveAll()
       _debugger.start()
 
-  attach: =>
+  attach: ->
     return if _debugger.isConnected()
     _debugger.attach()
 
-  startActiveFile: =>
+  startActiveFile: ->
     return if _debugger.isConnected()
+    @saveAll()
     _debugger.startActiveFile()
 
-  toggleBreakpoint: =>
+  toggleBreakpoint: ->
     editor = atom.workspace.getActiveTextEditor()
     path = editor.getPath()
     {row} = editor.getCursorBufferPosition()
     _debugger.breakpointManager.toggleBreakpoint editor, path, row
 
-  stepNext: =>
+  stepNext: ->
     _debugger.step('next', 1) if _debugger.isConnected()
 
-  stepIn: =>
+  stepIn: ->
     _debugger.step('in', 1) if _debugger.isConnected()
 
-  stepOut: =>
+  stepOut: ->
     _debugger.step('out', 1) if _debugger.isConnected()
 
-  stop: =>
+  stop: ->
     _debugger.cleanup()
 
   deactivate: ->
@@ -92,3 +95,14 @@ module.exports =
 
   toggleDebugger: ->
     _debugger.toggle()
+
+  saveAll: ->
+    # code shamelessly copied from https://github.com/BrownBear2/atom-save-all/blob/master/lib/atom-save-all.coffee
+    current = atom.workspace?.getActiveEditor?()
+    current ?= atom.workspace?.getActiveTextEditor?()
+    if current? and current.getURI?()? and current.isModified?() and paneItem?.getPath?()? and (!fs.existsSync(paneItem.getPath()) or !fs.statSync(current.getPath()).isFile())
+      current.save()
+
+    for paneItem in atom.workspace.getPaneItems()
+      if paneItem.getURI?()? and paneItem.isModified?() and paneItem?.getPath?()? and fs.existsSync(paneItem.getPath()) and fs.statSync(paneItem.getPath()).isFile()
+        paneItem.save()
