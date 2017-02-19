@@ -230,6 +230,7 @@ exports.create = (_debugger) ->
       log "TreeViewWatchItem.load #{state.expression()}"
       if state.expression() is ""
         return new Promise (resolve) ->
+          state.editMode.set(true)
           t = TreeViewItem("<expression not set - double click to edit>", handlers: { dblclick: () => state.editMode.set(true) })
           state.value.set([t])
           resolve(state)
