@@ -53,7 +53,7 @@ class ProcessManager extends EventEmitter
 
         args = []
         args = args.concat (nodeArgs.split(' ')) if nodeArgs
-        args.push "--debug-brk=#{port}"
+        args.push "--inspect-brk=#{port}"
         args.push dbgFile
         args = args.concat (appArgs.split(' ')) if appArgs
 

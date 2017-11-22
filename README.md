@@ -71,13 +71,13 @@ This is the strategy being used:
 Start your node application in debug mode using
 
 ```Batch
->node --debug=5858 a.js
+>node --inspect=5858 a.js
 ```
 
 or
 
 ```Batch
->node --debug-brk=5858 a.js
+>node --inspect-brk=5858 a.js
 ```
 
 Make sure that your node-debugger settings for debugHost and debugPort are
